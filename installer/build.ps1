@@ -6,9 +6,9 @@
     dotnet tool install --global wix --version 6.0.1
     wix extension add -g WixToolset.UI.wixext/6.0.1
 
-  .\installer\build.ps1              -> installer\out\Lemur-1.2.0.msi
+  .\installer\build.ps1              -> installer\out\Lemur-1.2.1.msi
 #>
-param([string]$Version = "1.2.0")
+param([string]$Version = "1.2.1")
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path $PSScriptRoot -Parent

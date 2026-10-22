@@ -59,7 +59,7 @@ dotnet publish src/Lemur.Cli -c Release -o publish
 .\publish\llmmr.exe --help   # command line (setup, diagnosis, testing)
 ```
 
-The installer (`installer\out\Lemur-1.2.0.msi`, per-user, self-contained) needs the WiX 6 tool and its UI extension:
+The installer (`installer\out\Lemur-1.2.1.msi`, per-user, self-contained) needs the WiX 6 tool and its UI extension:
 
 ```powershell
 dotnet tool install --global wix --version 6.0.1
