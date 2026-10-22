@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>llmmr</AssemblyName>
+    <RootNamespace>Lemur.Cli</RootNamespace>
+    <ApplicationIcon Condition="Exists('..\..\assets\lemur.ico')">..\..\assets\lemur.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Pure C# Opus: only the voice benchmark uses it, to make test voices sound like a Teams call. -->
+    <PackageReference Include="Concentus" Version="2.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Lemur.Core\Lemur.Core.csproj" />
+  </ItemGroup>
+
+</Project>

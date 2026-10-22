@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Lemur.Cli/Lemur.Cli.csproj" />
+    <Project Path="src/Lemur.Core/Lemur.Core.csproj" />
+    <Project Path="src/Lemur/Lemur.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Lemur.Tests/Lemur.Tests.csproj" />
+  </Folder>
+  <Folder Name="/server/" />
+  <Folder Name="/server/voiceprint/">
+    <Project Path="server/voiceprint/Voiceprint.Service/Voiceprint.Service.csproj" />
+    <Project Path="server/voiceprint/Voiceprint.Service.Tests/Voiceprint.Service.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wording for WixUI_Minimal's pages. Its one page shows Agreement.rtf: what recording people asks of you. -->
+<WixLocalization Culture="en-US" Codepage="1252" xmlns="http://wixtoolset.org/schemas/v4/wxl">
+  <String Id="WelcomeEulaDlgTitle" Value="{\WixUI_Font_Title}Before you install [ProductName]" />
+  <String Id="WelcomeEulaDlgLicenseAcceptedCheckBox" Value="I'll tell people when I'm recording, and I accept these terms" />
+  <String Id="ExitDialogTitle" Value="{\WixUI_Font_Bigger}[ProductName] is installed" />
+  <String Id="ExitDialogDescription" Value="Lemur lives in the system tray, by the clock. The first time it starts, it asks for your server's address and your key. Lemur Help in the Start menu explains everything." />
+</WixLocalization>

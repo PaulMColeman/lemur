@@ -1,0 +1,673 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lemur Self-Hosting Guide</title>
+<meta name="description" content="The servers, models and hardware Lemur needs, and how to set them up on your own network.">
+<link rel="icon" href="img/lemur-icon.svg">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html">
+      <img src="img/lemur-logo.svg" alt="">
+      <span><span class="name">Lemur</span><span class="brand-sub">LLM Meeting Recorder</span></span>
+    </a>
+    <nav class="site-nav" aria-label="Help pages">
+      <a href="index.html">Overview</a>
+      <a href="manual.html">Manual</a>
+      <a href="self-hosting.html" aria-current="page">Self-hosting</a>
+    </nav>
+  </div>
+</header>
+
+<div class="page with-toc">
+  <nav class="toc" aria-label="On this page">
+    <p class="toc-title">On this page</p>
+    <ol>
+      <li><a href="#pieces">The pieces</a></li>
+      <li><a href="#models">The models</a></li>
+      <li><a href="#summary-model">Choosing the summary model</a></li>
+      <li><a href="#vocabulary">Words it gets wrong</a></li>
+      <li><a href="#hardware">Hardware</a>
+        <ol><li><a href="#example-builds">Example builds</a></li></ol>
+      </li>
+      <li><a href="#step-by-step">Set it up step by step</a>
+        <ol>
+          <li><a href="#before">Before you start</a></li>
+          <li><a href="#scriberr">Scriberr</a></li>
+          <li><a href="#voiceprint">Voiceprint service</a></li>
+          <li><a href="#llm-server">Summary model server</a></li>
+          <li><a href="#litellm">LiteLLM</a></li>
+          <li><a href="#proxy">HTTPS names</a></li>
+          <li><a href="#connect-pc">Connecting the PCs</a></li>
+          <li><a href="#check">Check it works</a></li>
+        </ol>
+      </li>
+      <li><a href="#local">Keeping it on your network</a></li>
+      <li><a href="#limits">Known limits</a></li>
+    </ol>
+  </nav>
+
+  <main id="main" class="prose">
+    <h1>Running the server side yourself</h1>
+    <p class="lead">Lemur records on the PC, but the heavy lifting (speech to text, telling voices apart, naming people,
+      writing the summary) happens on servers you run. This guide lists those servers, the models they run and the hardware
+      they need, then walks through setting them up.</p>
+    <div class="callout">
+      <span class="label">How sure is each number?</span>
+      <p><span class="tag measured">measured</span> numbers come from the author's working setup (October 2026).
+        <span class="tag estimate">estimate</span> numbers haven't been tried; treat them as a starting point.
+        <span class="tag untested">untested</span> marks things nobody has run yet. The setup commands are examples to adapt:
+        versions and flags change, and only the author's own setup has been measured.</p>
+    </div>
+
+    <!-- ===================================================== Pieces -->
+    <section aria-labelledby="pieces">
+      <h2 id="pieces">The pieces</h2>
+      <div class="diagram" role="img" aria-label="Diagram: the Windows PC running Lemur talks to Scriberr for transcription, and through LiteLLM to the voiceprint service and the summary model, all inside your own network.">
+        <svg viewBox="0 0 900 330" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" class="head"/>
+            </marker>
+          </defs>
+          <rect class="box pc" x="16" y="40" width="234" height="250" rx="12"/>
+          <text class="h" x="32" y="70">Your Windows PC</text>
+          <text class="m" x="32" y="90">Lemur, in the system tray</text>
+          <text x="32" y="126">• records your mic and the call</text>
+          <text x="32" y="152">• knows your voice from the</text>
+          <text x="44" y="170">two tracks</text>
+          <text x="32" y="196">• cuts short clips of each voice</text>
+          <text x="32" y="222">• compares them with the</text>
+          <text x="44" y="240">people you've named</text>
+          <text x="32" y="266">• writes .md, .html and .mp3</text>
+
+          <rect class="net" x="290" y="12" width="594" height="306" rx="16"/>
+          <text class="net-label" x="306" y="32">YOUR NETWORK ONLY</text>
+
+          <rect class="box svc" x="320" y="46" width="548" height="78" rx="10"/>
+          <text class="h" x="336" y="72">1 · Scriberr</text>
+          <text class="m" x="336" y="92">NVIDIA GPU · Parakeet TDT 0.6B v3 writes the words,</text>
+          <text class="m" x="336" y="110">pyannote community-1 works out who spoke when</text>
+
+          <rect class="box svc" x="320" y="150" width="166" height="140" rx="10"/>
+          <text class="h" x="336" y="176">3 · LiteLLM</text>
+          <text class="m" x="336" y="198">one address,</text>
+          <text class="m" x="336" y="216">a key per person</text>
+          <text class="m" x="336" y="240">+ Postgres</text>
+
+          <rect class="box svc" x="530" y="150" width="338" height="58" rx="10"/>
+          <text class="h" x="546" y="174">2 · Voiceprint service</text>
+          <text class="m" x="546" y="195">CPU · TitaNet-L turns voice clips into voiceprints</text>
+
+          <rect class="box svc" x="530" y="226" width="338" height="64" rx="10"/>
+          <text class="h" x="546" y="250">4 · Summary model</text>
+          <text class="m" x="546" y="272">GPU or unified memory · 64k+ tokens of context</text>
+
+          <path class="arrow" d="M252 85 H316" marker-start="url(#ah)" marker-end="url(#ah)"/>
+          <path class="arrow" d="M252 220 H316" marker-start="url(#ah)" marker-end="url(#ah)"/>
+          <path class="arrow" d="M488 179 H526" marker-start="url(#ah)" marker-end="url(#ah)"/>
+          <path class="arrow" d="M488 258 H526" marker-start="url(#ah)" marker-end="url(#ah)"/>
+          <path class="arrow" d="M403 126 V146" stroke-dasharray="4 3" marker-end="url(#ah)"/>
+        </svg>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Service</th><th>Job</th><th>Runs on</th><th>Needed?</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td><a href="https://github.com/rishikanthc/Scriberr">Scriberr</a> <strong>v1.2.0</strong><br><code>ghcr.io/rishikanthc/scriberr-cuda:v1.2.0</code></td>
+              <td>Transcription and telling speakers apart. It also passes the summary request on to the summary model.</td><td>NVIDIA GPU</td><td>Yes</td></tr>
+            <tr><td>2</td><td>Voiceprint service (<code>server/voiceprint</code> in Lemur's source)</td>
+              <td>Turns 0.5–15 s voice clips into voiceprints, so people are recognised from one meeting to the next</td><td>CPU</td><td>Only for voice recognition</td></tr>
+            <tr><td>3</td><td><a href="https://github.com/BerriAI/litellm">LiteLLM</a> proxy, with Postgres</td>
+              <td>One OpenAI-style address for the summary model and the voiceprint service, with a key per person</td><td>CPU</td><td>Strongly recommended</td></tr>
+            <tr><td>4</td><td>An LLM server with an OpenAI-compatible API: vLLM, llama.cpp's <code>llama-server</code>, Ollama, LM Studio…</td>
+              <td>The summary, and spotting self-introductions ("hi, it's Dana")</td><td>GPU or large unified memory</td><td>Yes</td></tr>
+            <tr><td>–</td><td>A reverse proxy with TLS: Caddy, Nginx Proxy Manager, Traefik…</td>
+              <td>HTTPS names for the services above</td><td>CPU</td><td>Recommended</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Pin Scriberr to v1.2.0. Lemur uses its API (<code>/api/v1/transcription/upload</code>, <code>/start</code>,
+        <code>/status</code>, <code>/transcript</code>, <code>/speakers</code>, <code>/summarize/</code>,
+        <code>/profiles/</code>), and a newer release may change it.</p>
+    </section>
+
+    <!-- ===================================================== Models -->
+    <section aria-labelledby="models">
+      <h2 id="models">The models</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Job</th><th>Model</th><th>Where it runs</th><th>Speed</th></tr></thead>
+          <tbody>
+            <tr><td>Speech to text</td><td>NVIDIA <strong>Parakeet TDT 0.6B v3</strong> (NeMo, 0.6 billion parameters), run by Scriberr</td>
+              <td>NVIDIA GPU</td><td><span class="tag measured">measured</span> on an RTX 3090, transcription plus speakers:
+                2-min call 39 s · 17 min 82 s · 39 min 184 s · 48 min 208 s</td></tr>
+            <tr><td>Who spoke when</td><td><strong>pyannote speaker-diarization-community-1</strong>, run by Scriberr</td>
+              <td>NVIDIA GPU</td><td>Included above (17 min: 37 s for the words, 42 s for the speakers)</td></tr>
+            <tr><td>Voiceprints</td><td><strong>NVIDIA NeMo TitaNet-L</strong> (<code>nemo_en_titanet_large.onnx</code>, 192 numbers per voice,
+              from sherpa-onnx's speaker-recognition model release)</td><td>CPU, 2 threads</td>
+              <td><span class="tag measured">measured</span> 2–4 s per meeting</td></tr>
+            <tr><td>Summary, titles and introductions</td><td>A chat model that can reason; see <a href="#summary-model">Choosing the summary model</a></td>
+              <td>GPU or unified memory, 20–100 GB</td><td><span class="tag measured">measured</span> with the author's model:
+                summary 46–134 s for 17–48-minute meetings (its title and one-line description come with it); introductions
+                28–63 s, once 305 s; a title for an older meeting, 3 s</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Long recordings:</strong> anything over 5 minutes goes through Parakeet in 5-minute pieces, while pyannote
+        works on the whole file, so each person keeps one label from start to finish. Lemur uploads one file per meeting; don't
+        split recordings yourself.</p>
+      <p><strong>Voiceprint models:</strong> Lemur has built-in matching numbers for TitaNet-L, worked out on 47 people from
+        the AMI meeting corpus. It recognises a model by what it answers, not by its name. Any other model (the voiceprint
+        service's compose file defaults to the smaller, faster WeSpeaker ResNet34) needs <code>llmmr voices benchmark</code>
+        first, or voice recognition skips with <span class="ui">no matching numbers for this model yet</span>.</p>
+      <p><strong>End to end</strong> <span class="tag measured">measured</span>: a 48-minute Teams call had its notes
+        6½ minutes after it ended. Mixing took under a second, transcription 3 min 28 s, naming speakers 63 s, the summary
+        1 min 54 s, and writing the note with its MP3 5 s.</p>
+    </section>
+
+    <!-- ===================================================== Summary model -->
+    <section aria-labelledby="summary-model">
+      <h2 id="summary-model">Choosing the summary model</h2>
+      <p>Lemur sends the whole speaker-labelled transcript in one request, so the model needs:</p>
+      <ul>
+        <li><strong>An OpenAI-compatible <code>/v1/chat/completions</code> endpoint.</strong> Models that think before they
+          answer are fine: Lemur drops <code>&lt;think&gt;</code> blocks.</li>
+        <li><strong>Enough context.</strong> A transcript is about <strong>300 tokens per minute</strong> of meeting
+          (<span class="tag measured">measured</span>: 53 KB for 43 minutes). Add up to 16k tokens for the answer
+          (<code>summary.maxTokens</code>, which includes the model's thinking) and about 2k for the instructions:
+          <div class="table-wrap">
+            <table class="compact">
+              <thead><tr><th>Longest meeting</th><th class="num">Context needed</th></tr></thead>
+              <tbody>
+                <tr><td>1 hour</td><td class="num">36k tokens</td></tr>
+                <tr><td>2 hours</td><td class="num">55k tokens</td></tr>
+              </tbody>
+            </table>
+          </div>
+          Give it <strong>64k as a minimum, 128k to be comfortable</strong>.</li>
+        <li><strong>Room to think.</strong> Set <code>summary.maxTokens</code> to at least 16384. A reasoning model used up to
+          13,500 tokens on the introductions check of a 17-minute meeting, and ran out at 8,192 on a 48-minute one.</li>
+        <li><strong>Speed.</strong> With the Scriberr backend, Scriberr waits 5 minutes for the summary, then gives up. A model
+          that needs longer on your longest meetings never produces a summary for them. (Sending the summary straight to the
+          model is planned.)</li>
+      </ul>
+      <p><strong>Measured comparison.</strong> Five meetings from the AMI corpus that come with human-written summaries,
+        Lemur's own instructions, and a 32k-token limit. An AI judge that didn't know which model wrote what scored each
+        note out of 20 and counted its factual errors.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Model</th><th>Hardware</th><th class="num">Score /20</th><th class="num">Errors per meeting</th><th>Time per summary</th></tr></thead>
+          <tbody>
+            <tr><td>Qwen3.8-Flash-Next (mixture of experts)</td><td>3× AMD Radeon AI PRO R9700 (96 GB), vLLM on ROCm, 524k context</td><td class="num">15.6</td><td class="num">1.2</td><td>46–134 s</td></tr>
+            <tr><td>Qwen3.6-35B-A3B (mixture of experts)</td><td>Framework Desktop: Ryzen AI Max+ 395, 128 GB unified memory</td><td class="num">13.0</td><td class="num">3.4</td><td>42–75 s</td></tr>
+            <tr><td>Qwen3.8-27B (dense; 3 meetings only)</td><td>the same Framework Desktop</td><td class="num"><strong>18.7</strong></td><td class="num"><strong>0</strong></td><td>356–472 s</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul>
+        <li>The 27B dense model wrote the most accurate notes, but slowly on unified memory. On a graphics card with fast
+          memory (a 32 GB RTX 5090 or Radeon AI PRO R9700, at 4-bit) it should be several times faster
+          <span class="tag estimate">estimate</span>. That makes it the best candidate for a new setup.</li>
+        <li>The 35B-A3B is fast, but it turns suggestions into decisions and gives tasks to the wrong people.</li>
+        <li>The author uses Qwen3.8-Flash-Next.</li>
+      </ul>
+      <div class="callout">
+        <span class="label">Tip</span>
+        <p>In LiteLLM, give the summary model a neutral name such as <code>meeting-summary</code>. Then you can swap the model
+          behind it without touching anyone's PC.</p>
+      </div>
+    </section>
+
+    <!-- ===================================================== Vocabulary -->
+    <section aria-labelledby="vocabulary">
+      <h2 id="vocabulary">Words it gets wrong</h2>
+      <p>Speech recognition writes names it doesn't know as words it does: a product, a customer or a colleague's name comes
+        out as something that sounds like it. Each person's <a href="manual.html#settings-vocabulary">vocabulary</a> in Lemur
+        lists the right spellings and what they're misheard as. What happens to it depends on the transcription model:</p>
+      <div class="table-wrap">
+        <table class="compact">
+          <thead><tr><th>Transcription</th><th>Can it be told the words?</th><th>What Lemur does</th></tr></thead>
+          <tbody>
+            <tr><td>Scriberr with NVIDIA Parakeet or Canary</td><td>No. Scriberr v1.2.0 passes no word list to them.</td>
+              <td>Fixes the words in the transcript after it comes back</td></tr>
+            <tr><td>Scriberr with a Whisper (WhisperX) profile</td><td>Yes, as its <code>initial_prompt</code></td>
+              <td>Sends the words, unless the profile has a prompt of its own, and fixes the rest afterwards</td></tr>
+            <tr><td>An OpenAI-compatible Whisper server</td><td>Yes, as the request's <code>prompt</code></td>
+              <td>Sends the words, unless <code>extraFields</code> already has a <code>prompt</code> (an empty one sends none, for a
+                server that refuses the field), and fixes the rest afterwards</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Whatever the model, the transcript the summary model reads already has the listed mishearings fixed, and it's told
+        how the vocabulary's words in that transcript are spelled. It isn't told the others: given the whole list, a
+        summary model listed words nobody had said under "Concepts and terms", with meanings it made up.</p>
+      <p>NVIDIA's NeMo can boost words for Parakeet as it decodes ("GPU-PB" phrase boosting, from a list of key phrases),
+        without retraining. Scriberr doesn't use it yet; a transcription server that does would hear the words right in the
+        first place.</p>
+    </section>
+
+    <!-- ===================================================== Hardware -->
+    <section aria-labelledby="hardware">
+      <h2 id="hardware">Hardware</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Piece</th><th>Minimum</th><th>Suggested</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Transcription GPU</td><td>NVIDIA with 8 GB, CUDA <span class="tag estimate">estimate</span></td>
+              <td>12–24 GB: RTX 3060 12 GB, RTX 4060 Ti 16 GB, a used RTX 3090</td>
+              <td>Scriberr's GPU image needs CUDA (NVIDIA). Its CPU image exists, but it's <span class="tag untested">untested</span>
+                and much slower. Models load per job and free the card afterwards. One RTX 3090 transcribes about
+                <strong>14× faster than real time</strong> <span class="tag measured">measured</span>: enough for a team's whole day of meetings.</td></tr>
+            <tr><td>Summary model</td><td>About 20 GB of GPU or unified memory for a 27–35B model at 4-bit, plus its context</td>
+              <td>One 32 GB card (RTX 5090, Radeon AI PRO R9700), or a 128 GB unified-memory machine</td>
+              <td>See the comparison above. An LLM server usually holds its memory all the time, so give it its own card
+                rather than sharing Scriberr's.</td></tr>
+            <tr><td>Voiceprint service</td><td>1 CPU core, well under 1 GB of memory</td><td>2 cores</td><td>Stores nothing.</td></tr>
+            <tr><td>LiteLLM and Postgres</td><td>2 cores, 2 GB</td><td>2–4 cores, 4 GB</td><td>Postgres holds the per-person keys.</td></tr>
+            <tr><td>Disk</td><td>Scriberr keeps about <strong>115 MB per hour of meeting</strong> (the uploaded audio)</td><td>1–2 TB SSD</td>
+              <td>An hour of meetings every working day is about 30 GB a year.</td></tr>
+            <tr><td>Network</td><td>100 Mbit LAN</td><td>Gigabit</td>
+              <td>An hour-long meeting uploads 115 MB: about 1 s on gigabit, about 45 s over a 20 Mbit VPN.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="example-builds">Example builds</h3>
+      <ol>
+        <li><strong>The author's setup</strong> <span class="tag measured">measured</span>. It works well, but it's three
+          machines that already existed, not a shopping list.
+          <ul>
+            <li>Transcription and voiceprints: a Dell Precision T5820 with an RTX 3090 24 GB, Docker on Unraid.</li>
+            <li>Summary: a server with 3× Radeon AI PRO R9700, vLLM (ROCm) serving Qwen3.8-Flash-Next.</li>
+            <li>Gateway: LiteLLM in a small Proxmox container, behind Nginx Proxy Manager with TLS.</li>
+          </ul>
+        </li>
+        <li><strong>One workstation, two graphics cards</strong> <span class="tag untested">untested</span>.
+          <ul>
+            <li>An NVIDIA 12–16 GB card for Scriberr, plus a 32 GB card (RTX 5090 or Radeon AI PRO R9700) for a 27B-class
+              summary model at 4-bit with 64–128k context.</li>
+            <li>8 or more CPU cores, 64 GB of memory, a 2 TB SSD, everything in Docker on Linux. The simplest box that should
+              match the measured quality and speed.</li>
+          </ul>
+        </li>
+        <li><strong>Quiet and low power</strong> (half measured).
+          <ul>
+            <li>Summary: a Framework Desktop or another Ryzen AI Max+ 395 machine with 128 GB, running Qwen3.6-35B-A3B (fast,
+              less careful) or Qwen3.8-27B (careful, 6–8 minutes a meeting).</li>
+            <li>Transcription still needs an NVIDIA card in another machine. Transcribing on its processor is <span class="tag untested">untested</span>.</li>
+          </ul>
+        </li>
+        <li><strong>One 24 GB NVIDIA card for everything</strong> <span class="tag untested">untested</span>.
+          <ul>
+            <li>Scriberr, plus a ~14B summary model at 4-bit in the rest of the card's memory.</li>
+            <li>The cheapest, but nobody has checked a 14B model's summaries yet. Compare a few notes with your own before
+              relying on it.</li>
+          </ul>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ===================================================== Step by step -->
+    <section aria-labelledby="step-by-step">
+      <h2 id="step-by-step">Set it up step by step</h2>
+      <p>This puts every service in Docker on Linux, behind HTTPS names on your network:
+        <code>scriberr.example.lan</code> for Scriberr and <code>llm.example.lan</code> for LiteLLM. Replace the names,
+        hosts and keys with your own. Everything below is an example to adapt.</p>
+
+      <h3 id="before">1. Before you start</h3>
+      <ul>
+        <li><strong>Docker with Compose</strong> on each server.</li>
+        <li><strong>For NVIDIA cards:</strong> the NVIDIA driver and the NVIDIA Container Toolkit, so containers can use the
+          card. Check that <code>docker run --rm --gpus all &lt;any CUDA base image&gt; nvidia-smi</code> lists it.</li>
+        <li><strong>Two names in your network's DNS</strong>, for example <code>scriberr.example.lan</code> and
+          <code>llm.example.lan</code>, pointing at the machine that will run the reverse proxy.</li>
+        <li><strong>A Hugging Face account</strong>, to download the models once. Accept the conditions of
+          <code>pyannote/speaker-diarization-community-1</code> on its model page, and create a <strong>read-only</strong>
+          access token.</li>
+        <li><strong>Random secrets</strong> for the keys below. <code>openssl rand -hex 32</code> makes one.</li>
+      </ul>
+
+      <h3 id="scriberr">2. Scriberr</h3>
+      <span class="code-title">scriberr/compose.yaml</span>
+      <pre><code>services:
+  scriberr:
+    image: ghcr.io/rishikanthc/scriberr-cuda:v1.2.0   # pinned: Lemur talks to its API
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - scriberr-data:/app/data          # uploads, transcripts and its database
+      - scriberr-env:/app/whisperx-env   # model environments and downloads (several GB)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+volumes:
+  scriberr-data:
+  scriberr-env:</code></pre>
+      <p>Start it with <code>docker compose up -d</code> and open <code>http://&lt;server&gt;:8080</code>. Check Scriberr's
+        own README for its current ports and settings. Then, in Scriberr's web page:</p>
+      <ol>
+        <li>Create your account.</li>
+        <li>Make a transcription profile: model <strong>NVIDIA Parakeet</strong> (<code>parakeet-tdt-0.6b-v3</code>),
+          diarization <strong>pyannote community-1</strong>, with your Hugging Face token. Mark it as the default, or put its
+          name in each PC's <span class="ui">Profile</span> setting.</li>
+        <li>In Scriberr's LLM settings, point it at LiteLLM (<code>https://llm.example.lan/v1</code>, after
+          <a href="#litellm">step 5</a>) with a LiteLLM key of its own, and choose <code>meeting-summary</code> as the
+          summary model.</li>
+        <li>Under Settings → API keys, create a key for each person who'll use Lemur.</li>
+      </ol>
+      <p>The first transcription takes longer: Scriberr downloads Parakeet and pyannote and prepares their environments.</p>
+      <div class="callout warn">
+        <span class="label">Scriberr keeps the Hugging Face token in plain text</span>
+        <p>It's stored in every job's settings. Use a read-only token that can do nothing else.</p>
+      </div>
+
+      <h3 id="voiceprint">3. Voiceprint service <span class="muted small">(only for voice recognition)</span></h3>
+      <p>The service is in Lemur's source code, in <code>server/voiceprint</code>; its <code>README.md</code> covers every
+        option. Copy that folder to a server, then:</p>
+      <pre><code>cd voiceprint
+mkdir -p models
+curl -L -o models/nemo_en_titanet_large.onnx \
+  https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/nemo_en_titanet_large.onnx
+printf 'VOICEPRINT_API_KEY=%s\nVOICEPRINT_MODEL=nemo_en_titanet_large\n' "$(openssl rand -hex 32)" &gt; .env
+docker compose up -d --build
+curl http://localhost:8090/healthz    <span class="c"># {"ok":true,"model":"nemo_en_titanet_large","dim":192}</span></code></pre>
+      <p>The model comes from <a href="https://github.com/k2-fsa/sherpa-onnx/releases/tag/speaker-recongition-models">sherpa-onnx's
+        speaker-recognition models release</a> (the tag really is spelled <code>recongition</code>). Use TitaNet-L: Lemur's
+        built-in matching numbers are for it. The service keeps nothing on disk, and it runs with a read-only file system.</p>
+
+      <h3 id="llm-server">4. The summary model server</h3>
+      <p>Pick one. Each serves the model under the name <code>meeting-summary</code>, with at least 64k tokens of context.
+        The model names are placeholders: choose a 4-bit build of a 27B-class model that fits your card (see
+        <a href="#summary-model">Choosing the summary model</a>).</p>
+
+      <details class="option" open>
+        <summary>vLLM <span class="muted">· NVIDIA cards, fastest</span></summary>
+        <div class="body">
+          <pre><code>docker run -d --name summary-llm --restart unless-stopped \
+  --gpus all --ipc=host -p 8000:8000 \
+  -v ~/.cache/huggingface:/root/.cache/huggingface \
+  vllm/vllm-openai:&lt;version&gt; \
+  --model &lt;Hugging Face id of a 4-bit (AWQ or GPTQ) 27B-class Qwen model&gt; \
+  --served-model-name meeting-summary \
+  --max-model-len 65536 \
+  --gpu-memory-utilization 0.90 \
+  --api-key "$LLM_API_KEY"</code></pre>
+          <ul>
+            <li>Pin the image to a version you've tested rather than <code>latest</code>.</li>
+            <li>If vLLM says the context doesn't fit, try <code>--kv-cache-dtype fp8</code>, or a smaller model. Don't go below
+              the context your longest meetings need.</li>
+            <li>For a Qwen reasoning model, recent vLLM versions can return its thinking separately
+              (<code>--reasoning-parser qwen3</code>). Lemur copes either way.</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="option">
+        <summary>llama.cpp <span class="muted">· any card, including AMD and unified memory</span></summary>
+        <div class="body">
+          <pre><code>docker run -d --name summary-llm --restart unless-stopped \
+  --gpus all -p 8000:8000 -v /srv/models:/models \
+  ghcr.io/ggml-org/llama.cpp:server-cuda \
+  -m /models/&lt;model&gt;-Q4_K_M.gguf \
+  --alias meeting-summary \
+  -c 65536 -np 1 -ngl 99 --jinja \
+  --host 0.0.0.0 --port 8000 \
+  --api-key "$LLM_API_KEY"</code></pre>
+          <ul>
+            <li><code>-c 65536</code> is the context, and <code>-np 1</code> gives all of it to one request (llama-server
+              splits the context between parallel requests). <code>-ngl 99</code> puts every layer on the card, and
+              <code>--jinja</code> uses the model's own chat template.</li>
+            <li>For AMD cards, including the Ryzen AI Max in a Framework Desktop, use llama.cpp's Vulkan or ROCm image instead
+              of <code>server-cuda</code>, and pass the card's devices (<code>/dev/dri</code>, plus <code>/dev/kfd</code> for
+              ROCm) instead of <code>--gpus all</code>. Check llama.cpp's documentation for the current image names.</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="option">
+        <summary>Ollama <span class="muted">· simplest to try</span></summary>
+        <div class="body">
+          <pre><code>ollama pull &lt;model&gt;
+cat &gt; Modelfile &lt;&lt;'EOF'
+FROM &lt;model&gt;
+PARAMETER num_ctx 65536
+EOF
+ollama create meeting-summary -f Modelfile</code></pre>
+          <div class="callout warn">
+            <span class="label">Set num_ctx, or long meetings get cut</span>
+            <p>Ollama's default context is small. It doesn't give an error when a transcript is longer: it silently drops the
+              start, and the summary misses most of the meeting. The Modelfile above fixes the context for every request.</p>
+          </div>
+          <ul>
+            <li>Its OpenAI-compatible address is <code>http://&lt;server&gt;:11434/v1</code>.</li>
+            <li>Ollama has no keys. Let only LiteLLM reach it, for example by putting them on the same Docker network and not
+              publishing port 11434.</li>
+          </ul>
+        </div>
+      </details>
+
+      <h3 id="litellm">5. LiteLLM</h3>
+      <p>LiteLLM puts the summary model and the voiceprint service behind one address, and gives each person their own key
+        that only works for those two models.</p>
+      <span class="code-title">litellm/.env</span>
+      <pre><code>LITELLM_MASTER_KEY=sk-&lt;random&gt;      <span class="c"># your admin key; starts with sk-</span>
+LITELLM_SALT_KEY=sk-&lt;random&gt;        <span class="c"># encrypts what LiteLLM stores; never change it once set</span>
+POSTGRES_PASSWORD=&lt;random&gt;
+LLM_API_KEY=&lt;the key you gave the summary model server&gt;
+VOICEPRINT_API_KEY=&lt;from the voiceprint service's .env&gt;</code></pre>
+      <span class="code-title">litellm/compose.yaml</span>
+      <pre><code>services:
+  litellm:
+    image: ghcr.io/berriai/litellm:&lt;version&gt;   # pin a version you've tested
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    environment:
+      DATABASE_URL: postgresql://litellm:${POSTGRES_PASSWORD}@db:5432/litellm
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY}
+      LITELLM_SALT_KEY: ${LITELLM_SALT_KEY}
+      LLM_API_KEY: ${LLM_API_KEY}
+      VOICEPRINT_API_KEY: ${VOICEPRINT_API_KEY}
+    depends_on:
+      - db
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: litellm
+      POSTGRES_USER: litellm
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:</code></pre>
+      <span class="code-title">litellm/config.yaml</span>
+      <pre><code>model_list:
+  - model_name: meeting-summary              <span class="c"># the name Lemur asks for</span>
+    litellm_params:
+      model: openai/meeting-summary          <span class="c"># "openai/" + the name your model server uses</span>
+      api_base: http://llm-host:8000/v1      <span class="c"># Ollama: http://ollama-host:11434/v1</span>
+      api_key: os.environ/LLM_API_KEY        <span class="c"># Ollama: any text</span>
+      timeout: 1200                          <span class="c"># long meetings can take minutes</span>
+
+  - model_name: speaker-embed-local          <span class="c"># Lemur's default voiceprint model name</span>
+    litellm_params:
+      model: openai/nemo_en_titanet_large    <span class="c"># the voiceprint service ignores this name</span>
+      api_base: http://voiceprint-host:8090/v1
+      api_key: os.environ/VOICEPRINT_API_KEY
+    model_info:
+      mode: embedding
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  database_url: os.environ/DATABASE_URL
+  store_prompts_in_spend_logs: false         <span class="c"># don't copy transcripts into the database</span>
+
+<span class="c"># No fallbacks and no callbacks: nothing leaves your network.</span></code></pre>
+      <p>Start it with <code>docker compose up -d</code>. Then make a key for each person, limited to the two models (shown
+        here through the HTTPS name from <a href="#proxy">step 6</a>):</p>
+      <pre><code>curl -s https://llm.example.lan/key/generate \
+  -H "Authorization: Bearer $LITELLM_MASTER_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"key_alias": "lemur-dana", "models": ["meeting-summary", "speaker-embed-local"]}'</code></pre>
+      <p>The answer's <code>"key"</code> (<code>sk-…</code>) is Dana's summary key. Make one for Scriberr the same way, with
+        only <code>meeting-summary</code>. A key can be blocked or deleted on its own later, without affecting anyone else.</p>
+
+      <h3 id="proxy">6. HTTPS names</h3>
+      <p>Put Scriberr and LiteLLM behind a reverse proxy with TLS, so audio and transcripts are encrypted on your network
+        too. With Caddy:</p>
+      <span class="code-title">Caddyfile</span>
+      <pre><code>scriberr.example.lan {
+	tls internal
+	reverse_proxy scriberr-host:8080
+}
+
+llm.example.lan {
+	tls internal
+	reverse_proxy litellm-host:4000
+}</code></pre>
+      <p><code>tls internal</code> makes Caddy its own certificate authority. Each PC must trust it once: copy Caddy's root
+        certificate (<code>pki/authorities/local/root.crt</code> in Caddy's data folder) to the PC and run:</p>
+      <pre><code>certutil -user -addstore Root root.crt</code></pre>
+      <p>Windows asks you to confirm. Instead, you can use certificates from your organisation's own authority, or a
+        DNS-validated certificate for a domain you own. That works without opening anything to the internet.</p>
+      <div class="callout warn">
+        <span class="label">nginx and Nginx Proxy Manager</span>
+        <p>Raise two defaults: <code>client_max_body_size</code> (an hour of meeting uploads about 115 MB; nginx allows
+          1 MB) and <code>proxy_read_timeout</code> (summaries can take several minutes; nginx waits 60 seconds). For
+          example <code>client_max_body_size 1g;</code> and <code>proxy_read_timeout 900s;</code>.</p>
+      </div>
+
+      <h3 id="connect-pc">7. Connecting the PCs</h3>
+      <p><strong>The easy way:</strong> set Lemur up on your own PC first. Then Settings → Account →
+        <span class="ui">Export setup file…</span> makes a <code>.lemursetup</code> file holding the server addresses and model
+        names, never keys. Send it to each person with their own keys. Their setup window imports it, and they paste their
+        keys in.</p>
+      <p><strong>By hand:</strong> in <code>%APPDATA%\Lemur\settings.json</code> (the <a href="manual.html#settings-file">manual</a>
+        covers the file):</p>
+      <pre><code>"backend": {
+  "type": "scriberr",
+  "scriberr": { "baseUrl": "https://scriberr.example.lan", "apiKeySecret": "scriberr-api-key" }
+},
+"summary": {
+  "baseUrl": "https://llm.example.lan/v1",   <span class="c">// LiteLLM; for the introductions check and meeting titles</span>
+  "model": "meeting-summary",
+  "apiKeySecret": "summary-api-key",
+  "maxTokens": 16384
+},
+"speakers": { "enabled": true, "model": "speaker-embed-local", "apiKeySecret": "voiceprint-api-key" }</code></pre>
+      <p>Keys go into Windows Credential Manager, never the file. Copy each key, then pipe it in from the clipboard so it
+        doesn't land in your terminal history:</p>
+      <pre><code>Get-Clipboard | llmmr set-secret scriberr-api-key    <span class="c"># a Scriberr API key</span>
+Get-Clipboard | llmmr set-secret summary-api-key     <span class="c"># the person's LiteLLM key</span>
+llmmr settings                                       <span class="c"># "status: ready"</span></code></pre>
+      <p>An empty <code>speakers.baseUrl</code> means "the same LiteLLM as the summary". The voiceprint key can be the same
+        LiteLLM key: when <code>voiceprint-api-key</code> isn't stored and the address matches, the summary key is used.</p>
+
+      <h3 id="check">8. Check it works</h3>
+      <p>From a PC, in PowerShell (use <code>curl.exe</code>: plain <code>curl</code> is something else in Windows PowerShell):</p>
+      <pre><code>$key = "sk-your-litellm-key"
+curl.exe -s https://llm.example.lan/v1/models -H "Authorization: Bearer $key"
+
+$body = '{"model":"meeting-summary","max_tokens":2000,"messages":[{"role":"user","content":"Reply with five words."}]}'
+$body | curl.exe -s https://llm.example.lan/v1/chat/completions -H "Authorization: Bearer $key" -H "Content-Type: application/json" -d '@-'
+
+curl.exe -s -o NUL -w "%{http_code}`n" https://scriberr.example.lan/api/v1/profiles/ -H "X-API-Key: your-scriberr-key"</code></pre>
+      <ul>
+        <li>The first lists <code>meeting-summary</code> and <code>speaker-embed-local</code>.</li>
+        <li>The second answers with a short reply. A thinking model may take a little while.</li>
+        <li>The third prints <code>200</code>. It prints only the status on purpose: Scriberr's profile list includes the
+          Hugging Face token, which shouldn't end up on your screen.</li>
+      </ul>
+      <p>Then, in Lemur:</p>
+      <ol>
+        <li>Settings → Account → <span class="ui">Test connection</span>: every server passes.</li>
+        <li><code>llmmr voices calibrate</code> names the voiceprint model and says Lemur has matching numbers for it (only if
+          voice recognition is on).</li>
+        <li>Make a two-minute test call, or choose <span class="ui">Start recording now</span> while a video with people
+          talking plays. Watch the steps in the <a href="manual.html#recordings">Recordings window</a>; the note should
+          appear a minute or two after you stop.</li>
+      </ol>
+    </section>
+
+    <!-- ===================================================== Local -->
+    <section aria-labelledby="local">
+      <h2 id="local">Keeping it all on your network</h2>
+      <p>Nothing in this chain calls a cloud service. To keep it that way:</p>
+      <ul>
+        <li><strong>The internet is only needed at setup</strong>: Docker images, the models from Hugging Face, and the
+          voiceprint model from GitHub. After that you can block the servers' outgoing traffic. Scriberr may try to reach
+          Hugging Face when it loads models; <code>HF_HUB_OFFLINE=1</code> should stop that, but it's
+          <span class="tag untested">untested</span>, so run a meeting through after you block it.</li>
+        <li><strong>No cloud fallbacks.</strong> Don't add hosted models to LiteLLM's fallback lists. A fallback that quietly
+          sends a transcript to a hosted API is the easiest way to lose "local".</li>
+        <li><strong>No logging callbacks</strong> (Langfuse, Helicone…) in LiteLLM, and keep
+          <code>store_prompts_in_spend_logs: false</code>.</li>
+        <li><strong>Away from the office or home,</strong> connect over a VPN (WireGuard, Tailscale, Headscale, NetBird)
+          rather than opening ports.</li>
+        <li><strong>TLS even on your own network.</strong> Audio and transcripts are the sensitive part, and they travel
+          with every meeting.</li>
+      </ul>
+      <p id="data">Where each meeting's data ends up:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Data</th><th>Where</th><th>Kept</th></tr></thead>
+          <tbody>
+            <tr><td>Recorded tracks, the mix, that meeting's voiceprints</td><td>PC, <code>%LOCALAPPDATA%\Lemur\recordings</code></td><td>14 days after the note (<code>keepAudioDays</code>), then deleted, unless the meeting is marked Keep recording</td></tr>
+            <tr><td>The note: <code>.md</code>, <code>.html</code> and its <code>.mp3</code></td><td>PC, <code>Documents\Meeting Notes</code></td><td>until you delete it; with <code>noteMp3.deleteWithAudio</code> the <code>.mp3</code> goes with the recorded tracks (to the Recycle Bin)</td></tr>
+            <tr><td>The people folder: names and voiceprints, which are biometric data</td><td>PC, or a folder you sync between your own PCs</td><td>until you delete them</td></tr>
+            <tr><td>Uploaded audio, transcript, summary</td><td><strong>Scriberr's data volume</strong></td><td><strong>until deleted in Scriberr</strong> (Lemur doesn't delete them yet)</td></tr>
+            <tr><td>Clips sent for voiceprints</td><td>Voiceprint service</td><td>never stored</td></tr>
+            <tr><td>Prompts and summaries</td><td>Summary model server and LiteLLM</td><td>not stored with <code>store_prompts_in_spend_logs: false</code>; check your model server's own logging</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================================================== Limits -->
+    <section aria-labelledby="limits">
+      <h2 id="limits">Known limits</h2>
+      <ul>
+        <li><strong>Scriberr waits 5 minutes for a summary.</strong> A slow model can't summarize long meetings (see
+          <a href="#summary-model">above</a>).</li>
+        <li><strong>Scriberr keeps every job's audio.</strong> Clean it up by hand for now.</li>
+        <li><strong>Scriberr has one library.</strong> Everyone's meetings sit in the same Scriberr account, visible to
+          whoever can sign in to it. That's fine for one person or a household. For a team, give each person their own
+          Scriberr, or wait for the planned multi-user transcription path.</li>
+        <li><strong>The OpenAI-compatible transcription option</strong> (<code>backend.type: "openai"</code>) needs a server
+          that returns speaker-separated <code>diarized_json</code>. Without it the transcript has no speakers. No local
+          server with that output has been tried; Scriberr is the tested path. If the server also sends word times (a
+          <code>words</code> list), Lemur uses them to split a line between you and someone who cut in.</li>
+        <li><strong>One meeting at a time per PC.</strong> Several people sharing one server queue on its card. Scriberr ran
+          two jobs at once on one RTX 3090 <span class="tag measured">measured</span>; the model server's own batching
+          decides the rest.</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="inner">
+    <span>Lemur 1.2 · LLM Meeting Recorder</span>
+    <a href="index.html">Overview</a>
+    <a href="manual.html">Manual</a>
+  </div>
+</footer>
+</body>
+</html>

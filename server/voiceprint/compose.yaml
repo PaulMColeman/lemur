@@ -1,0 +1,19 @@
+# Example. Put a model in ./models and VOICEPRINT_API_KEY=<random> in ./.env, then:
+#   docker compose up -d --build
+services:
+  voiceprint:
+    build: .
+    image: voiceprint:0.1.0
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    environment:
+      VOICEPRINT_MODEL_PATH: /models/${VOICEPRINT_MODEL:-wespeaker_en_voxceleb_resnet34_LM}.onnx
+      VOICEPRINT_THREADS: ${VOICEPRINT_THREADS:-2}
+      VOICEPRINT_API_KEY: ${VOICEPRINT_API_KEY:?set VOICEPRINT_API_KEY in .env}
+    volumes:
+      - ./models:/models:ro
+    # The service never writes to disk; a read-only root makes that enforced, not promised.
+    read_only: true
+    tmpfs:
+      - /tmp

@@ -1,0 +1,1055 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lemur User Manual</title>
+<meta name="description" content="How to install, set up and use Lemur, the LLM Meeting Recorder for Windows.">
+<link rel="icon" href="img/lemur-icon.svg">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html">
+      <img src="img/lemur-logo.svg" alt="">
+      <span><span class="name">Lemur</span><span class="brand-sub">LLM Meeting Recorder</span></span>
+    </a>
+    <nav class="site-nav" aria-label="Help pages">
+      <a href="index.html">Overview</a>
+      <a href="manual.html" aria-current="page">Manual</a>
+      <a href="self-hosting.html">Self-hosting</a>
+    </nav>
+  </div>
+</header>
+
+<div class="page with-toc">
+  <nav class="toc" aria-label="On this page">
+    <p class="toc-title">On this page</p>
+    <ol>
+      <li><a href="#getting-started">Getting started</a>
+        <ol>
+          <li><a href="#install">Install</a></li>
+          <li><a href="#upgrading">Upgrading from Teams Recorder</a></li>
+          <li><a href="#setup">First-run setup</a></li>
+        </ol>
+      </li>
+      <li><a href="#recording">Recording</a>
+        <ol>
+          <li><a href="#automatic">Calls, automatically</a></li>
+          <li><a href="#back-to-back">Back-to-back meetings</a></li>
+          <li><a href="#manual-recording">In person, or any app</a></li>
+          <li><a href="#consent">Telling people</a></li>
+          <li><a href="#tray">The tray icon and menu</a></li>
+          <li><a href="#notifications">Notifications</a></li>
+        </ol>
+      </li>
+      <li><a href="#recordings">The Recordings window</a>
+        <ol>
+          <li><a href="#finding">Finding a meeting</a></li>
+          <li><a href="#renaming">Renaming a meeting</a></li>
+          <li><a href="#fix-word">Fixing a misheard word</a></li>
+          <li><a href="#keep-recording">Keeping a meeting's recording</a></li>
+        </ol>
+      </li>
+      <li><a href="#notes">Meeting notes</a></li>
+      <li><a href="#naming">Naming speakers</a></li>
+      <li><a href="#settings">Settings</a>
+        <ol>
+          <li><a href="#settings-account">Account</a></li>
+          <li><a href="#settings-recording">Recording</a></li>
+          <li><a href="#settings-notes">Notes</a></li>
+          <li><a href="#settings-vocabulary">Vocabulary</a></li>
+          <li><a href="#settings-people">People</a></li>
+          <li><a href="#settings-about">About</a></li>
+          <li><a href="#settings-file">The settings file</a></li>
+        </ol>
+      </li>
+      <li><a href="#privacy">Your data and privacy</a></li>
+      <li><a href="#troubleshooting">Troubleshooting</a></li>
+      <li><a href="#command-line">Command line: llmmr</a></li>
+      <li><a href="#uninstall">Uninstalling</a></li>
+    </ol>
+  </nav>
+
+  <main id="main" class="prose">
+    <h1>Lemur user manual</h1>
+    <p class="lead">Lemur records your calls and in-person meetings, and turns each one into a note: a summary, action
+      items, decisions and the full transcript. This manual covers installing it, what it does on its own, and every
+      window and setting.</p>
+
+    <!-- ===================================================== Getting started -->
+    <section aria-labelledby="getting-started">
+      <h2 id="getting-started">Getting started</h2>
+      <p>Lemur has two halves. The app on your PC records. Servers on your network turn the recording into text and
+        notes. If someone else runs the servers, you need their address and your own key (or a setup file from them).
+        If you run them yourself, see the <a href="self-hosting.html">self-hosting guide</a>.</p>
+
+      <h3 id="install">Install</h3>
+      <ol>
+        <li>Double-click <code>Lemur-1.2.0.msi</code>. It installs just for you, into
+          <code>%LOCALAPPDATA%\Programs\Lemur</code>, so it doesn't need an administrator.</li>
+        <li>The installer isn't signed yet, so Windows may show <span class="ui">Windows protected your PC</span>. Choose
+          <span class="ui">More info</span>, then <span class="ui">Run anyway</span>.</li>
+        <li>When it finishes, let it start Lemur. The <a href="#setup">setup window</a> opens the first time.</li>
+      </ol>
+      <p>The installer adds two Start menu shortcuts: <span class="ui">Lemur</span> and <span class="ui">Lemur Help</span>
+        (this manual). It also adds Lemur's folder to your <code>PATH</code>, so the <a href="#command-line"><code>llmmr</code>
+        command</a> works in any new terminal.</p>
+      <p>Only one Lemur runs at a time. Starting it again from the Start menu while it's running opens its
+        <a href="#recordings">Recordings window</a>.</p>
+      <p>To update, run the newer installer the same way, between calls: it closes Lemur, puts the new version over the
+        old one, and starts it again. Your settings, keys, people, recordings and notes stay as they are.</p>
+
+      <h3 id="upgrading">Upgrading from Teams Recorder</h3>
+      <p>Lemur used to be called Teams Recorder. The first time Lemur starts, it brings everything over:</p>
+      <div class="table-wrap">
+        <table class="compact">
+          <thead><tr><th>What</th><th>From</th><th>To</th></tr></thead>
+          <tbody>
+            <tr><td>Settings and the people folder</td><td><code>%APPDATA%\TeamsRecorder</code></td><td><code>%APPDATA%\Lemur</code></td></tr>
+            <tr><td>Recordings and logs</td><td><code>%LOCALAPPDATA%\TeamsRecorder</code></td><td><code>%LOCALAPPDATA%\Lemur</code></td></tr>
+            <tr><td>Keys in Credential Manager</td><td><code>TeamsRecorder:&lt;name&gt;</code></td><td><code>Lemur:&lt;name&gt;</code></td></tr>
+            <tr><td>Start at sign-in</td><td>Teams Recorder's entry</td><td>Lemur's entry</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul>
+        <li><strong>Quit Teams Recorder first</strong> (its tray icon → <span class="ui">Quit</span>). If it's still
+          running, Lemur tells you and closes; start Lemur again once Teams Recorder has quit.</li>
+        <li>Folders are moved, not copied. If a Lemur folder already has files in it, nothing is overwritten: the old
+          folder stays where it is. The same goes for a key Lemur already has under the same name.</li>
+        <li>Your notes stay where they are. Their <span class="ui">Name speakers</span> links still work, and old
+          <code>.trecsetup</code> files still import.</li>
+      </ul>
+
+      <h3 id="setup">First-run setup</h3>
+      <p>The setup window walks through six steps: <span class="ui">Welcome to Lemur</span>, <span class="ui">Account</span>,
+        <span class="ui">Recording</span>, <span class="ui">Notes</span>, <span class="ui">People</span> and
+        <span class="ui">Ready</span>. Most steps are the same pages as in <a href="#settings">Settings</a>, so you can
+        change anything later.</p>
+      <figure>
+        <img src="img/setup-welcome.png" alt="The setup window's first step, Welcome to Lemur, explaining what Lemur does and reminding you to tell people you're recording.">
+        <figcaption>Step 1: what Lemur does, and a reminder to tell people you're recording.</figcaption>
+      </figure>
+      <ol>
+        <li><strong>Welcome.</strong> What Lemur does. You'll need your server's address (or a setup file) and your own key.</li>
+        <li><strong>Account.</strong> If you were given a <code>.lemursetup</code> file, click
+          <span class="ui">Import setup file…</span> first: it fills in everything except your key. Then click
+          <span class="ui">Change…</span> next to each key and paste it in. Details in <a href="#settings-account">Account settings</a>.</li>
+        <li><strong>Recording.</strong> Whether to record calls by themselves, and from which devices. The defaults suit most people.</li>
+        <li><strong>Notes.</strong> Where notes go (<code>Documents\Meeting Notes</code> unless you choose another
+          folder) and how long the working audio is kept.</li>
+        <li><strong>People.</strong> Optional: recognising people by their voice, and where the people you name are kept.
+          You can pick <span class="ui">This PC</span>, <span class="ui">OneDrive</span>, or
+          <span class="ui">A folder I already use on another PC</span>.</li>
+        <li><strong>Ready.</strong> Lemur tests each server. Tick <span class="ui">Start Lemur when I sign in to Windows</span>
+          so it's always there for your calls, then click <span class="ui">Finish</span>.</li>
+      </ol>
+      <figure>
+        <img src="img/setup-account.png" alt="The setup window's Account step: an Import setup file button, your name, the transcription server, the summary model and the key fields.">
+        <figcaption>Step 2: import a setup file if you have one, then save your key.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/setup-ready.png" alt="The setup window's last step, Ready: the connection test results and the Start Lemur when I sign in to Windows option.">
+        <figcaption>Step 6: the connection test, and starting Lemur when you sign in.</figcaption>
+      </figure>
+      <div class="callout">
+        <span class="label">If the test fails</span>
+        <p>Click <span class="ui">Test again</span>, or go <span class="ui">&lt; Back</span> and fix the address or key.
+          You can also click <span class="ui">Finish anyway</span>. Lemur still records your calls, but it can't make notes
+          until the servers answer. Its tray icon is yellow until then.</p>
+      </div>
+      <p>If you close the setup window, Lemur still starts with blank settings. Open <span class="ui">Settings…</span>
+        from the tray menu to finish later.</p>
+    </section>
+
+    <!-- ===================================================== Recording -->
+    <section aria-labelledby="recording">
+      <h2 id="recording">Recording</h2>
+      <p>Lemur records two tracks at once: your <strong>microphone</strong>, and <strong>everything your headset or
+        speakers play</strong> (everyone else on the call). Keeping them apart is how Lemur knows which lines are yours:
+        each word goes to the track it was said on, so a line where someone cuts in is split between you.</p>
+
+      <h3 id="automatic">Calls, automatically</h3>
+      <p>Once a second, Lemur asks Windows which apps are using the microphone. When a call app holds it for
+        <strong>3 seconds</strong>, recording starts. When the app lets go of it for <strong>15 seconds</strong>, recording
+        stops and the notes are made. The 15 seconds ride out things like switching headsets.</p>
+      <div class="table-wrap">
+        <table class="compact">
+          <thead><tr><th>Built-in</th><th>How Lemur tells it's a call</th><th>Tried on real calls?</th></tr></thead>
+          <tbody>
+            <tr><td>Teams (Edge)</td><td>Edge uses the mic, and one of its windows is titled <code>… | Microsoft Teams</code></td><td>Yes</td></tr>
+            <tr><td>Teams (Chrome)</td><td>The same, in Chrome</td><td>Not separately</td></tr>
+            <tr><td>Teams (app), Teams (classic)</td><td>The Teams app uses the mic</td><td>Not yet</td></tr>
+            <tr><td>Google Meet (Edge), Google Meet (Chrome)</td><td>The browser uses the mic, and a window shows a Meet tab</td><td>Not yet</td></tr>
+            <tr><td>Zoom (Edge), Zoom (Chrome)</td><td>The browser uses the mic, and a window shows a tab titled <code>Zoom</code></td><td>Not yet</td></tr>
+            <tr><td>Zoom, GoTo Meeting, GoTo Meeting (classic)</td><td>The app uses the mic</td><td>Not yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>You can switch any of them off on the <a href="#settings-recording">Recording tab</a>. If one of them doesn't start
+        on its own, use <span class="ui">Start recording now</span> and see <a href="#troubleshooting">Troubleshooting</a>.</p>
+      <ul>
+        <li><strong>Muting doesn't stop a recording.</strong> Teams keeps the microphone open while you're muted, so a long
+          mute is still one recording.</li>
+        <li><strong>Very short calls are thrown away.</strong> An automatic recording under 60 seconds is discarded,
+          because it's usually Teams' microphone preview before you join. You'll see <span class="ui">Recording not kept</span>.
+          To keep a short call, stop the recording yourself from the tray menu.</li>
+        <li><strong>A browser call needs its tab showing.</strong> Lemur reads window titles, which show each window's
+          current tab. A call started in a background tab is picked up once you switch to it.</li>
+        <li><strong>It follows your headset.</strong> If the call uses a headset that isn't the Windows default, that's what
+          gets recorded. Switch headsets mid-call and the recording follows within a few seconds.</li>
+        <li><strong>Sleep and sign-out.</strong> If the PC goes to sleep or you sign out during a call, the recording is
+          stopped and kept.</li>
+        <li><strong>Pausing.</strong> <span class="ui">Pause auto-record for 1 hour</span> in the tray menu stops calls
+          starting recordings. <span class="ui">Resume auto-record</span> undoes it.</li>
+        <li><strong>Stopping one call.</strong> If you stop a call's recording yourself, Lemur doesn't start recording that
+          same call again.</li>
+      </ul>
+      <div class="callout warn">
+        <span class="label">Everything on that headset is recorded</span>
+        <p>The "everyone else" track is all the sound going to the call's headset or speakers. A video or a notification
+          sound playing on the same device during a call ends up in the transcript. Pause other audio during calls.</p>
+      </div>
+
+      <h3 id="back-to-back">Back-to-back meetings</h3>
+      <p>When you leave one Teams meeting and join the next, Teams takes the microphone back within a couple of seconds.
+        Lemur notices the gap. If the Teams window then shows its join screen or a different meeting's name, Lemur ends
+        the first recording and starts a new one, so each meeting gets its own note.</p>
+      <ul>
+        <li>Leaving and rejoining the <em>same</em> meeting also shows the join screen, so it's split into two notes too.</li>
+        <li>To split by hand, choose <span class="ui">Start a new recording (next meeting)</span> from the tray menu.</li>
+        <li>Notifications about earlier meetings wait until your call ends, so they don't pop up during the next one.</li>
+      </ul>
+
+      <h3 id="manual-recording">In person, or any app</h3>
+      <p>Choose <span class="ui">Start recording now</span> from the tray menu, and <span class="ui">Stop recording</span>
+        when you're done. Use it for meetings in a room, or a call app Lemur doesn't know.</p>
+      <ul>
+        <li>Lemur records from whichever app has a microphone open, and its headset; with none, the Windows defaults. It
+          keeps following that app: change the microphone in the call, or join the call after starting, and the recording
+          moves with it within a few seconds.</li>
+        <li>Recordings you start yourself are never thrown away for being short.</li>
+        <li>In a room there's no call audio to compare with, so Lemur can't tell which voice is yours from the two tracks.
+          Speakers are labelled Speaker A, Speaker B and so on. With <a href="#naming">voice recognition</a> on,
+          <span class="ui">Learn my voice from calls</span> lets it recognise you anyway.</li>
+      </ul>
+
+      <h3 id="importing">From your phone or another recorder</h3>
+      <p>A meeting you recorded somewhere else, on your phone, a dictaphone or as a video, becomes notes like any other.
+        Give it to Lemur in any of these ways:</p>
+      <ul>
+        <li><strong>An import folder.</strong> Choose one on the <a href="#settings-recording">Recording tab</a>, under
+          <span class="ui">Recordings from elsewhere</span>. A folder that syncs from your phone works well: OneDrive,
+          iCloud Drive or Nextcloud. Save a voice memo there from your phone and Lemur picks it up within a minute, once
+          it has finished arriving. When Lemur has it, the file moves to an <strong>Imported</strong> folder inside, so you
+          can see it was taken. Lemur never deletes your file.</li>
+        <li><span class="ui">Import…</span> in the <a href="#recordings">Recordings window</a>, or <span class="ui">Import a
+          recording…</span> in the tray menu. Pick one file or several.</li>
+        <li><strong>Drop the file</strong> on the Recordings window.</li>
+      </ul>
+      <p>For one file, Lemur shows what it worked out before importing, so you can change it:</p>
+      <figure class="narrow">
+        <img src="img/import.png" alt="The Import a recording window: the file's name and length, a Title box (blank, to let the notes suggest one), the start date and time, and a line saying the file didn't say when it was recorded, so the time is when it was last saved.">
+        <figcaption>The title and start time Lemur worked out. Here the file didn't carry its recording time, so check it.</figcaption>
+      </figure>
+      <ul>
+        <li><strong>Title.</strong> From the file's name, unless it says nothing ("New Recording 12", "Voice 003"). Leave it
+          blank and the notes suggest one. A title from a file you didn't type yourself, from the import folder, is only a
+          stand-in: phones often name recordings after the street they were made in, so the notes' title replaces it.</li>
+        <li><strong>Start time.</strong> Phones write the time they started recording into the file (m4a, mp4, mov, 3gp),
+          and Lemur uses that. Otherwise it looks for a date and time in the file's name, and failing that uses when the
+          file was last saved, less its length. The date decides where the meeting is listed and what its note is called.</li>
+        <li><strong>Files Windows can read:</strong> m4a, mp3, wav, aac, wma, flac, 3gp and amr, and the sound of mp4, mov
+          and m4v videos. Ogg, opus and webm need Microsoft's free <em>Web Media Extensions</em>. A file Lemur can't use
+          (not a recording, or silent) moves to a <strong>Couldn't import</strong> folder inside the import folder, and a
+          notification says why.</li>
+        <li><strong>The same file twice</strong> is noticed and not made into notes again.</li>
+        <li>It's made into notes like <a href="#manual-recording">an in-person meeting</a>: everyone is on one track, so
+          you're recognised by your voice, with <a href="#naming">voice recognition</a> on, rather than by your
+          microphone.</li>
+      </ul>
+
+      <h3 id="consent">Telling people you're recording</h3>
+      <div class="callout warn">
+        <span class="label">Your responsibility</span>
+        <p>Recording people without telling them can be against the law where you or they are. Some places (for example
+          Illinois and California) need everyone's consent, and your employer may have its own rules. Each time a
+          recording starts, Lemur's notification says <span class="ui">Let everyone know you're recording.</span></p>
+      </div>
+
+      <h3 id="tray">The tray icon and menu</h3>
+      <p>Lemur lives in the system tray, by the clock. If you can't see it, click the <kbd>^</kbd> arrow there, and drag
+        the icon onto the taskbar to keep it in view. Its colour tells you what it's doing:</p>
+      <ul class="icon-legend">
+        <li><span class="dot idle" aria-hidden="true"></span><span><strong>Grey-blue dot:</strong> watching for calls.</span></li>
+        <li><span class="dot rec" aria-hidden="true"></span><span><strong>Red:</strong> recording.</span></li>
+        <li><span class="dot busy" aria-hidden="true"></span><span><strong>Orange:</strong> making meeting notes.</span></li>
+        <li><span class="dot attn" aria-hidden="true"></span><span><strong>Yellow:</strong> needs setup. Calls are still
+          recorded, but notes can't be made until settings are filled in.</span></li>
+        <li><span class="dot paused" aria-hidden="true"></span><span><strong>Grey ring:</strong> auto-record is paused.</span></li>
+      </ul>
+      <p>Point at the icon to see its status. Double-click it to open the <a href="#recordings">Recordings window</a>.
+        Right-click it for the menu:</p>
+      <ul class="menu-mock" aria-label="The tray menu">
+        <li class="dim">Watching for calls <span class="when">what Lemur is doing</span></li>
+        <li class="sep" role="separator"></li>
+        <li>Start recording now <span class="when">becomes Stop recording while recording</span></li>
+        <li>Start a new recording (next meeting) <span class="when">only while recording</span></li>
+        <li>Discard this recording <span class="when">only while recording</span></li>
+        <li>Import a recording… <span class="when">make notes from a file (<a href="#importing">From your phone</a>)</span></li>
+        <li>Pause auto-record for 1 hour <span class="when">becomes Resume auto-record while paused</span></li>
+        <li class="sep" role="separator"></li>
+        <li class="bold">Recordings…</li>
+        <li>Open last meeting notes</li>
+        <li>Name voices in last meeting…</li>
+        <li>Open notes folder</li>
+        <li class="sep" role="separator"></li>
+        <li>Settings…</li>
+        <li>Reload settings</li>
+        <li>Open log folder</li>
+        <li>Help</li>
+        <li class="sep" role="separator"></li>
+        <li>Quit</li>
+      </ul>
+      <dl class="defs">
+        <dt>Status line</dt><dd>What Lemur is doing: <span class="ui">Watching for calls</span>,
+          <span class="ui">Recording 12:34 — Teams (Edge)</span>, <span class="ui">Making meeting notes…</span> or
+          <span class="ui">Auto-record paused until …</span>. It also shows how many meetings are waiting, and
+          <span class="ui">needs setup</span> when settings are incomplete.</dd>
+        <dt>Discard this recording</dt><dd>Stops and deletes the recording now. Nothing from it is kept.</dd>
+        <dt>Open last meeting notes</dt><dd>The most recent note made since Lemur started.</dd>
+        <dt>Name voices in last meeting…</dt><dd>Opens <a href="#naming">Who's speaking?</a> for that meeting.</dd>
+        <dt>Reload settings</dt><dd>Re-reads the <a href="#settings-file">settings file</a> after you edit it by hand.</dd>
+        <dt>Help</dt><dd>Opens this manual in your browser.</dd>
+        <dt>Quit</dt><dd>Stops Lemur. A recording in progress is stopped and kept; its notes are made next time Lemur starts.</dd>
+      </dl>
+
+      <h3 id="notifications">Notifications</h3>
+      <p>Lemur tells you what it's doing with Windows notifications. Clicking one takes you to the right place:</p>
+      <div class="table-wrap">
+        <table class="compact">
+          <thead><tr><th>Notification</th><th>When</th><th>Clicking it</th></tr></thead>
+          <tbody>
+            <tr><td>Recording your call (Teams (Edge))</td><td>A call recording starts. It reminds you to tell everyone.</td><td>Opens the Recordings window on it</td></tr>
+            <tr><td>Recording</td><td>You started a recording yourself</td><td>Opens the Recordings window on it</td></tr>
+            <tr><td>Making meeting notes</td><td>Lemur starts on a meeting, with a rough time ("Should take about 7 min"). Not during a call, and not for retries.</td><td>Opens the Recordings window, so you can follow along</td></tr>
+            <tr><td>Meeting notes ready</td><td>The note is written</td><td>Opens the note. If some voices weren't recognised: opens <a href="#naming">Who's speaking?</a></td></tr>
+            <tr><td>Couldn't make meeting notes yet</td><td>A step failed for the first time. Lemur retries by itself.</td><td>Opens the Recordings window on it, with the error</td></tr>
+            <tr><td>While you were in a call</td><td>Several meetings finished (or failed) during your call</td><td>Opens the Recordings window</td></tr>
+            <tr><td>Recording not kept</td><td>An automatic recording was under 60 seconds</td><td>—</td></tr>
+            <tr><td>Couldn't import a recording</td><td>A file in your import folder isn't a recording Lemur can use. During a call it waits until the call ends.</td><td>Opens the <strong>Couldn't import</strong> folder</td></tr>
+            <tr><td>Lemur needs setup</td><td>Lemur started with incomplete settings</td><td>Opens Settings at the Account tab</td></tr>
+            <tr><td>Couldn't start recording</td><td>A microphone or headset couldn't be opened</td><td>Opens the log folder</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================================================== Recordings window -->
+    <section aria-labelledby="recordings">
+      <h2 id="recordings">The Recordings window</h2>
+      <p>Every meeting, newest first, under headings for when it was: what each one was about, and what is happening to the
+        ones being recorded or turned into notes. Open it by double-clicking the tray icon, choosing
+        <span class="ui">Recordings…</span> from the tray menu, starting Lemur again from the Start menu, or clicking one of
+        its notifications.</p>
+      <figure>
+        <img src="img/recordings.png" alt="The Recordings window: a search box and date filter over a list of meetings under headings (Today, Yesterday, Earlier this week, Last week), each heading with its count and total time, each meeting with its title and a line on what it was about. The selected meeting is being summarized: its timeline shows the recording, then mixing, transcribing and naming speakers done with their times, summarizing in progress, and writing the note still to come.">
+        <figcaption>A meeting being summarized. Each row has the meeting's title and, under it, what it was about. The timeline shows how long each step took, the one running now, and roughly how long the rest will take.</figcaption>
+      </figure>
+
+      <h3 id="recordings-list">The list</h3>
+      <p>Meetings are grouped under headings, the way a mail program groups mail: <span class="ui">Today</span>,
+        <span class="ui">Yesterday</span>, <span class="ui">Earlier this week</span>, <span class="ui">Last week</span>, the rest
+        of this month (<span class="ui">Earlier in October</span>), then one heading for each month before
+        (<span class="ui">September 2026</span>). Each heading says how many meetings it holds and how long they were
+        altogether (<span class="ui">6 meetings · 3 h 40 min</span>). Weeks start on the day your Windows settings say.</p>
+      <ul>
+        <li>Click the arrow at the right of a heading, or double-click the heading, to open or close it. With a meeting
+          selected, <kbd>←</kbd> closes its heading. Right-click for <span class="ui">Expand all</span> and
+          <span class="ui">Collapse all</span>.</li>
+        <li>When the window opens, <span class="ui">Today</span> and <span class="ui">Yesterday</span> are open and the rest
+          closed. Headings stay the way you leave them until Lemur closes.</li>
+        <li>While you search or pick dates, every heading with a meeting found is open. Clear the search and the headings
+          go back to how you had them.</li>
+      </ul>
+      <p>Each row shows when the meeting started (as much of it as its heading doesn't say), its title, its length and its status. Under the title is one sentence on
+        what the meeting was about, written by your summary model with the notes, so you can tell meetings apart without
+        opening them. While a meeting's notes are being made, that line says when they should be ready instead.</p>
+      <p>Some call apps don't name their meetings: Google Meet, Zoom and GoTo Meeting, and recordings you start yourself.
+        Until its notes are made, such a meeting has a stand-in name in grey, such as
+        <span class="ui">Google Meet (Edge) call</span>. Then it takes the title your summary model suggests from what was said.
+        Meetings that Teams named keep their name, and so does any meeting you've renamed or whose note you've edited. You
+        can <a href="#renaming">rename</a> any meeting.</p>
+      <p>The icon at the start of the row:</p>
+      <ul class="icon-legend">
+        <li><svg viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="#c82020" fill-opacity=".24"/><circle cx="11" cy="11" r="6" fill="#c82020"/></svg><span><strong>Recording now</strong>, with a running clock.</span></li>
+        <li><svg viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="8.2" fill="none" stroke="#cddef4" stroke-width="3.2"/><path d="M11 2.8a8.2 8.2 0 0 1 8 6.4" fill="none" stroke="#0b62c4" stroke-width="3.2" stroke-linecap="round"/></svg><span><strong>Working</strong>: being turned into notes, with the step (<span class="ui">Transcribing… (step 2 of 5)</span>).</span></li>
+        <li><svg viewBox="0 0 22 22" aria-hidden="true" fill="none" stroke="#a0a0a0" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="9"/><path d="M11 6v5.4l4 2.2"/></svg><span><strong>Waiting</strong>: notes are made one meeting at a time, oldest first.</span></li>
+        <li><svg viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="#d66e00"/><path d="M11 5.5v6.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="11" cy="16" r="1.6" fill="#fff"/></svg><span><strong>Retrying</strong> (with the error and the time of the next try), or <strong>Interrupted</strong>: Lemur stopped while recording it (a crash, closing it, or a power cut).</span></li>
+        <li><svg viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="#228b4a"/><path d="M6.2 11.4l3.4 3.4 6.2-7" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span><strong>Done</strong>. <span class="ui">recording kept</span>: you ticked <a href="#keep-recording">Keep recording</a>. <span class="ui">audio deleted</span>: the working audio has gone (the note keeps its MP3), and <span class="ui">audio and MP3 deleted</span>: the note's MP3 has gone too (<a href="#settings-notes">Notes tab</a>).</span></li>
+      </ul>
+
+      <h3 id="finding">Finding a meeting</h3>
+      <p>Type in the search box at the top, or press <kbd>Ctrl</kbd>+<kbd>F</kbd>. It finds meetings by anything in them:
+        the title, the one-line description, the people named, and the whole note, summary and transcript. Every word you
+        type must be in the meeting somewhere, in any order. Put words in quotes to find them side by side
+        (<code>"vendor contract"</code>). <kbd>Esc</kbd> clears the search.</p>
+      <p>The box beside it limits the list to <span class="ui">Today</span>, <span class="ui">Yesterday</span>, the last 7 or
+        30 days, this month or last month, this year, or <span class="ui">Between dates…</span> that you choose. The count
+        on the right says how many meetings are showing.</p>
+      <figure>
+        <img src="img/recordings-search.png" alt="The Recordings window searching for &quot;calendar&quot;: one meeting of nine matches. The panel beside its steps lists what it was about, who was there, and the lines where the word comes up, with the time and speaker for lines of the transcript.">
+        <figcaption>A search: one meeting of nine matches, and the panel on the right shows where the word comes up.</figcaption>
+      </figure>
+      <p>Select a meeting and the panel beside its steps shows what it was about and who was there. While you search, it
+        also lists the lines where your words come up: lines of the transcript with their time and speaker, and lines of
+        the summary.</p>
+
+      <h3 id="renaming">Renaming a meeting</h3>
+      <p>Select a meeting and click <span class="ui">Rename…</span>, or press <kbd>F2</kbd>.</p>
+      <figure class="narrow">
+        <img src="img/rename.png" alt="The Rename meeting window: the meeting's date and app, a box with its title, a link to use the title the notes suggested, a Suggest a title button, and the name the note's files will get.">
+        <figcaption>The title the notes suggested is one click away. The note's files are renamed to match.</figcaption>
+      </figure>
+      <ul>
+        <li>The link under the box fills in the title your summary model suggested when it wrote the notes.</li>
+        <li><span class="ui">Suggest a title</span> asks your summary model again, from the meeting's summary. It takes a
+          few seconds.</li>
+        <li>The note's files (<code>.md</code>, <code>.html</code>, <code>.mp3</code> and <code>.json</code>) are renamed to
+          match, and the title inside them changes. If you edited the note yourself, your edits stay: only its title changes.</li>
+        <li>For a meeting still waiting for its notes, the notes take the new title when they're made.</li>
+      </ul>
+
+      <h3 id="fix-word">Fixing a misheard word</h3>
+      <p>Transcription doesn't know the names of your company's products, customers or people, so it writes what it hears:
+        "Cooper Netties" for Kubernetes. Fix it once and it's fixed everywhere.</p>
+      <ol class="numbered">
+        <li>Search for the wrong word, so you can see where it is.</li>
+        <li>Click <span class="ui">Fix a word…</span>, beside the search box (or right-click a meeting). What you searched for
+          is filled in.</li>
+        <li>Type how it should be written. Lemur counts the meetings that have the wrong word.</li>
+        <li>Click <span class="ui">Fix</span>.</li>
+      </ol>
+      <figure class="narrow">
+        <img src="img/fix-word.png" alt="The Fix a word window: it wrote Cooper Netties, it should say Kubernetes, fix it in the 5 meetings already made that have it (four of them listed), and fix it in every new meeting too.">
+        <figcaption>One word fixed in five meetings, and in every meeting from now on.</figcaption>
+      </figure>
+      <ul>
+        <li><strong>The meetings already made:</strong> their transcripts, summaries, titles, descriptions and notes are
+          fixed. A note you edited keeps your edits: only the word changes.</li>
+        <li><strong>Every new meeting:</strong> the word goes into your <a href="#settings-vocabulary">vocabulary</a>, so it's
+          fixed in every transcript from now on, before the summary is written.</li>
+        <li>Lemur matches whole words, in any case, so fixing "Santavo" doesn't touch "Santavos". A misheard word can be several
+          words ("Cooper Netties").</li>
+      </ul>
+
+      <h3 id="recordings-steps">The steps</h3>
+      <p>Select a meeting to see its steps as a timeline: <span class="ui">Recording</span>,
+        <span class="ui">Mixing the two tracks</span>, <span class="ui">Transcribing</span>,
+        <span class="ui">Naming speakers</span>, <span class="ui">Summarizing</span> and <span class="ui">Writing the note</span>.</p>
+      <ul class="icon-legend">
+        <li><svg viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="#228b4a"/><path d="M6.2 11.4l3.4 3.4 6.2-7" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span><strong>Done</strong>, with how long it took (and how many tries, if more than one).</span></li>
+        <li><svg viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="8.2" fill="none" stroke="#cddef4" stroke-width="3.2"/><path d="M11 2.8a8.2 8.2 0 0 1 8 6.4" fill="none" stroke="#0b62c4" stroke-width="3.2" stroke-linecap="round"/></svg><span><strong>Running now</strong> (the ring turns), with the time so far and how long it usually takes.</span></li>
+        <li><svg viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="#d66e00"/><path d="M11 5.5v6.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="11" cy="16" r="1.6" fill="#fff"/></svg><span><strong>Failed</strong>, with the try number and when it will be tried again.</span></li>
+        <li><svg viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="9" fill="none" stroke="#a0a0a0" stroke-width="2"/></svg><span><strong>Still to come</strong>, with a rough time (<span class="ui">~2 min</span>).</span></li>
+      </ul>
+      <p>The line under the steps says when the notes should be ready (<span class="ui">Notes expected around 10:42</span>).
+        For a meeting waiting in line it counts the meetings ahead of it. For the call being recorded, it says how long the
+        notes would take if the call ended now. For a finished meeting, it says how long the notes took after the call ended.</p>
+      <p>The times to come are rough guesses. They start from measurements of the author's servers and adjust to yours as
+        your meetings finish (only steps that worked first time count).</p>
+      <figure>
+        <img src="img/recordings-done.png" alt="The Recordings window with a finished meeting selected: every step has a green check and its time, a line says how long after the call the notes were ready, and the panel beside it says what the meeting was about, who was there and where its note is. Under it, Keep recording is ticked, and its status says Done · recording kept.">
+        <figcaption>A finished meeting: what it was about, who was there, every step's time, and how long after the call the notes were ready. It's marked Keep recording, so its audio stays.</figcaption>
+      </figure>
+
+      <h3 id="recordings-buttons">The buttons</h3>
+      <dl class="defs">
+        <dt>Open note</dt><dd>Opens the meeting's note page. Double-clicking the row, or pressing <kbd>Enter</kbd>, does the same.</dd>
+        <dt>Rename…</dt><dd>Gives the meeting a new title, and its note's files a new name (<a href="#renaming">Renaming a
+          meeting</a>). <kbd>F2</kbd> does the same.</dd>
+        <dt>Fix a word…</dt><dd>Beside the search box: fixes a word the transcription keeps getting wrong
+          (<a href="#fix-word">Fixing a misheard word</a>).</dd>
+        <dt>Name speakers…</dt><dd>Opens <a href="#naming">Who's speaking?</a> for a finished meeting.</dd>
+        <dt>Show files</dt><dd>Opens the meeting's folder: its audio, transcript and state files.</dd>
+        <dt>Retry now</dt><dd>For a failed or waiting meeting: try at once instead of waiting for the next scheduled try
+          (after the meeting being worked on, if any).</dd>
+        <dt>Make notes anyway</dt><dd>Only for an interrupted recording: repairs the audio files Lemur left half-written,
+          then makes notes from what was recorded.</dd>
+        <dt>Delete…</dt><dd>Asks first. For a finished meeting it deletes the working files (audio, transcript, speaker
+          data) and keeps the note; you can't name its speakers afterwards. For an unfinished one it deletes the whole
+          recording. <kbd>Delete</kbd> does the same.</dd>
+        <dt>Import…</dt><dd>Makes notes from a recording made somewhere else: your phone, a recorder, a video
+          (<a href="#importing">From your phone or another recorder</a>). Dropping the file on the window does the same.</dd>
+        <dt>Open notes folder</dt><dd>Your notes folder.</dd>
+        <dt>Settings…</dt><dd>Opens <a href="#settings">Settings</a>.</dd>
+        <dt>Help</dt><dd>Opens this section of the manual.</dd>
+      </dl>
+      <p>Right-click a meeting for the same actions. Under what the meeting was about, the panel beside the steps has the
+        details: where the note is, a link to the transcript on your Scriberr server, and the last error if a step failed.</p>
+
+      <h3 id="keep-recording">Keeping a meeting's recording</h3>
+      <p>Lemur deletes the audio it works from 14 days after a meeting's notes are made
+        (<a href="#settings-notes">Keep audio for</a>), and the note's MP3 with it if you've chosen that. For a meeting
+        you'll want to hear again, tick <span class="ui">Keep recording</span> under its details: its audio and its note's
+        MP3 then stay, however old it gets. It's unticked to begin with.</p>
+      <ul>
+        <li>You can tick it while the meeting is being recorded or its notes are being made.</li>
+        <li>The line under the box says what it means for that meeting. If the working audio has gone already, ticking it
+          keeps the note's MP3. When there's nothing left to keep, the box is greyed out.</li>
+        <li>Untick it to let the clean-up have them again. For a meeting already older than the days, Lemur asks first:
+          what it still has is deleted within a few minutes.</li>
+        <li>The status column says <span class="ui">recording kept</span>, or <span class="ui">audio deleted · MP3 kept</span>.
+          The right-click menu has <span class="ui">Keep recording</span> too, and the command line has
+          <code>llmmr keep &lt;recording&gt;</code>.</li>
+      </ul>
+
+      <h3 id="retries">When something fails</h3>
+      <p>Each finished step is saved, so a retry starts at the step that failed. Lemur tries again after 1, 5 and 15 minutes,
+        then every hour, for as long as it takes. If a transcription timed out, the retry picks up the job on the server
+        instead of uploading the meeting again. A recording is never lost because a server was down.</p>
+    </section>
+
+    <!-- ===================================================== Notes -->
+    <section aria-labelledby="notes">
+      <h2 id="notes">Meeting notes</h2>
+      <p>Each meeting becomes four files in your notes folder (<code>Documents\Meeting Notes</code> unless you changed it),
+        named by date, time and meeting title:</p>
+      <div class="table-wrap">
+        <table class="compact">
+          <thead><tr><th>File</th><th>For</th></tr></thead>
+          <tbody>
+            <tr><td><code>2026-10-14 0930 Design review.html</code></td><td>Reading. Lemur opens this one. It has the audio player.</td></tr>
+            <tr><td><code>2026-10-14 0930 Design review.md</code></td><td>The same note as Markdown, for Obsidian or other note apps. It starts with front matter (title, one-line description, date, length, people) that those apps can search.</td></tr>
+            <tr><td><code>2026-10-14 0930 Design review.mp3</code></td><td>The meeting's audio: about 14 MB an hour. Kept with the note, unless you have Lemur <a href="#settings-notes">delete MP3s too</a> after 14 days.</td></tr>
+            <tr><td><code>2026-10-14 0930 Design review.json</code></td><td>The same meeting for programs: its facts, its action items and which are yours, links back to the note, and the transcript unless you <a href="#settings-notes">leave it out</a> (<a href="#meeting-file">The meeting file</a>).</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>A meeting the call app didn't name (Google Meet, Zoom, GoTo Meeting, or a recording you started yourself) is
+        named after the title your summary model suggests from what was said. <a href="#renaming">Renaming</a> a meeting in
+        the Recordings window renames its files together.</p>
+      <p>The note has these sections, written by your summary model from the transcript:</p>
+      <ul>
+        <li><strong>Summary</strong>: why the meeting happened and where it landed.</li>
+        <li><strong>Action items</strong>: a checklist, <code>- [ ] owner - task - due date [time]</code>, such as
+          <code>- [ ] Paul - send Northwind the pricing - Fri 2026-10-16 [00:12:34]</code>. Only things someone agreed to
+          do, not ideas that were floated. The due date is written out when one was said, and the time is where in the
+          meeting it was agreed: on the note page, it plays the recording from there. (Older notes have
+          neither.)</li>
+        <li><strong>Decisions</strong>, with the reason if one was given.</li>
+        <li><strong>Open questions</strong>, and who follows up.</li>
+        <li><strong>Concepts and terms</strong>: names, acronyms and ideas worth remembering.</li>
+        <li><strong>Transcript</strong>: every line, with its time and who said it.</li>
+      </ul>
+      <p>You can use your own summary instructions instead: see the <a href="#settings-notes">Notes tab</a>.</p>
+
+      <h3 id="note-page">The note page</h3>
+      <figure>
+        <img src="img/note-page.png" alt="A meeting note open in the browser: the title, date and length, the attendees as coloured chips with how long each talked, an audio player, the summary and action items, and the transcript with each speaker in their own colour.">
+        <figcaption>A note in the browser. Click any line of the transcript to hear it; the line being said is highlighted.</figcaption>
+      </figure>
+      <ul>
+        <li><strong>Attendees</strong>, under the title: everyone who spoke, you first and then the others by how long they
+          talked, each in the colour of their lines in the transcript. A voice nobody has named yet (Speaker E) or a guess
+          (Sam Okafor?) is shown in grey; <span class="ui">Name speakers</span>, just below, names them. Someone who never said
+          a word can't be heard, so isn't on the list.</li>
+        <li><strong>Click a line</strong> to play the recording from just before it. The line being said is highlighted as it plays.</li>
+        <li><strong>Click an action item's time</strong> (<code>00:12:34</code>) to hear where it was agreed.</li>
+        <li><strong>Opened at a moment</strong>, from a <a href="#note-links">link to the meeting</a>, the page scrolls to the
+          line said then and lights it, and <span class="ui">▶ Play from 12:34</span> plays it. (Browsers don't start
+          sound by themselves, so it waits for that click.)</li>
+        <li>The player stays at the top as you scroll.</li>
+        <li><span class="ui">Name speakers</span> opens <a href="#naming">Who's speaking?</a> in Lemur on this PC. The first
+          time, your browser may ask whether to open Lemur: allow it.</li>
+        <li>The page loads nothing from the internet. Its only script is the player.</li>
+      </ul>
+      <p>Keep the files together. If the MP3 isn't beside the page any more, the page says so and hides the player.
+        The MP3 is kept until you delete the note: the 14-day clean-up only touches the working audio Lemur keeps in its
+        recordings folder, unless you tick <span class="ui">Delete each note's MP3 too</span> on the
+        <a href="#settings-notes">Notes tab</a>. Then the MP3 goes with the working audio, to the Recycle Bin, and Lemur
+        makes the page again without its player and takes the link to the MP3 out of the Markdown note (out of one you
+        edited too, leaving your edits). The note and its transcript stay. A meeting marked
+        <a href="#keep-recording">Keep recording</a> keeps its MP3.</p>
+      <p>If you edit the Markdown note, Lemur doesn't rewrite it. Naming speakers later just swaps the labels in place, and
+        renaming the meeting just changes its title.</p>
+
+      <h3 id="meeting-file">The meeting file</h3>
+      <p>The <code>.json</code> beside each note is the meeting in a form a program can read: a script of yours, a note
+        app's plugin, or an assistant that turns your action items into tasks. It's written with the note, and again
+        whenever the note changes: speakers named, a word fixed, the meeting renamed or its notes made again. Meetings
+        from before it existed get one in the background, a few a minute. It is made from Lemur's own record of the
+        meeting, so editing the Markdown note doesn't change it.</p>
+      <dl class="defs">
+        <dt>The meeting</dt><dd><code>id</code> (the recording's name, such as <code>20261014-093000</code>, which never
+          changes), <code>title</code>, <code>description</code>, <code>startedAt</code>, <code>endedAt</code>,
+          <code>durationSeconds</code>, <code>source</code>, <code>recordedBy</code> (your name), <code>people</code> (everyone
+          heard, with <code>me</code>, how long they talked, and whether they're <code>named</code> for sure), and
+          <code>link</code> (<a href="#note-links">opens the note</a>).</dd>
+        <dt>Action items</dt><dd><code>actionItems</code>: each with an <code>id</code> that stays the same when speakers are
+          named, words are fixed or the meeting is renamed (an item worded differently when its notes are made again is a
+          new item, with a new id), its <code>text</code>, <code>owner</code>, <code>ownerIsMe</code>, <code>due</code> (a date, when the words
+          pin one down) and <code>dueText</code> (the words), <code>at</code> (seconds into the meeting) and a
+          <code>link</code> that opens the note there, and <code>done</code>. <code>ownerIsMe</code> is true when the owner is
+          you by name; Lemur knows which voice was yours, so a program doesn't have to guess. <code>actionItemsFound</code> is
+          false when the summary has no action items in the usual form (your own prompt, say): then trust nobody's owner.</dd>
+        <dt>The rest</dt><dd><code>summary</code>, <code>decisions</code>, <code>openQuestions</code>, the whole summary as
+          <code>summaryMarkdown</code>, and the <code>transcript</code>, one entry per speaker's turn.</dd>
+        <dt>Without the transcript</dt><dd>Untick <span class="ui">Include the transcript</span> on the
+          <a href="#settings-notes">Notes tab</a> when what reads the file may send it to a model on the internet. The file
+          then has everything else, but no <code>transcript</code>, and says so: <code>"leftOut": ["transcript"]</code>. Every
+          meeting's file is written again that way within a minute, and stays that way until you tick it again. The summary
+          is still in it, and the note's <code>.md</code> and page still have the whole transcript.</dd>
+        <dt>Changes</dt><dd><code>revision</code> changes whenever anything in the file does, and <code>revisedAt</code>
+          says when. A program given the file twice can tell an update from a repeat, and keep the newer.</dd>
+      </dl>
+      <p><code>meeting-file.schema.json</code>, beside this manual, describes every field for programs that check what they
+        read. <code>llmmr export &lt;recording&gt; --out &lt;folder&gt;</code> writes a meeting's file somewhere else, with
+        the transcript or without it as the Notes tab says, or as <code>--transcript</code> or <code>--no-transcript</code>
+        says for that one.</p>
+
+      <h3 id="note-links">Links to a meeting</h3>
+      <p>A link like <code>lemur://note/20261014-093000?t=754</code> opens that meeting's note page on a PC with Lemur, at
+        12 minutes 34 seconds in (without <code>?t=</code>, at the top). The meeting file has one for the meeting and one for
+        each action item, so a task made from an item can lead back to the moment it was agreed: put the link on a task
+        card, in a chat message or in a document.</p>
+      <ul>
+        <li>The first time, your browser asks whether to open Lemur, as it does for <span class="ui">Name speakers</span>.</li>
+        <li>It finds the note wherever it is now, even after a rename. On a second PC that shares your notes folder (through
+          OneDrive, say) it finds the note there, though the recording itself is on the first.</li>
+        <li>A meeting whose note isn't on this PC shows <span class="ui">That meeting's note isn't on this PC.</span></li>
+        <li>The link is only the recording's name and a time: nothing of the meeting is in it. On a phone it does nothing.</li>
+      </ul>
+    </section>
+
+    <!-- ===================================================== Naming -->
+    <section aria-labelledby="naming">
+      <h2 id="naming">Naming speakers</h2>
+      <p>In the transcript, your lines carry your name and everyone else starts as Speaker A, Speaker B and so on. There are
+        three ways other people get their real names:</p>
+      <dl class="defs">
+        <dt>Introductions</dt><dd>On by default. When someone says who they are ("hi, it's Dana"), your summary model spots
+          it and Dana is named in that meeting's note. Lemur only believes it if the words really are in that speaker's own
+          lines. It never remembers a voice from an introduction by itself.</dd>
+        <dt>Their voice</dt><dd>Off until you turn it on (Settings → <a href="#settings-people">People</a>). The first time
+          a voice is heard you name it once; after that it's recognised in every meeting. It needs the voiceprint service
+          on your server.</dd>
+        <dt>You</dt><dd>Name anyone yourself, in the <span class="ui">Who's speaking?</span> window.</dd>
+      </dl>
+
+      <h3 id="whos-speaking">The "Who's speaking?" window</h3>
+      <p>Open it from the <span class="ui">Meeting notes ready</span> notification when voices weren't recognised, from
+        <span class="ui">Name speakers…</span> in the Recordings window, from <span class="ui">Name voices in last meeting…</span>
+        in the tray menu, or from the <span class="ui">Name speakers</span> link on a note page. It never pops up by itself.</p>
+      <figure>
+        <img src="img/naming.png" alt="The Who's speaking? window: one row per voice, each with its colour, a play button, a few lines that person said, a name box and a Remember box.">
+        <figcaption>One row per voice: listen, read what they said, then type or pick a name.</figcaption>
+      </figure>
+      <dl class="defs">
+        <dt>The coloured label</dt><dd>Speaker A, B… in the same colour as on the note page.</dd>
+        <dt>▶</dt><dd>Plays a short clip of that voice. Press again for the next clip.</dd>
+        <dt>What they said</dt><dd>A few of their lines, with times, plus what Lemur thinks so far:
+          <span class="ui">Recognised as Dana</span>, <span class="ui">Introduced as Dana (00:01:23)</span>,
+          <span class="ui">Maybe Dana?</span>, <span class="ui">Sounds like two people</span> and so on.</dd>
+        <dt>Name</dt><dd>Type a name, or pick one from the list: everyone you've named before, and every name typed in this
+          window. One person can show up as two or three voices (Speaker B and Speaker E). Give each the same name and
+          they're one person, in the note and in your people folder. Pick <span class="ui">Me (your name)</span> if it's
+          you, or <span class="ui">Not a person (video, TV)</span> for a recording someone played.</dd>
+        <dt>Remember</dt><dd>Keeps a voiceprint of this person, so they're recognised next time. Only when voice
+          recognition is on and the meeting's audio is still there.</dd>
+        <dt>They agreed</dt><dd>Shown when Lemur asks before remembering a voice. Ticking it records that you say they
+          agreed. It isn't their written consent where the law asks for that. One tick is enough for each person: it
+          counts for every voice you give their name, in this meeting and later ones.</dd>
+      </dl>
+      <p>Click <span class="ui">Save</span> and the note is updated. The names go into the summary, the meeting's one-line
+        description and, when Lemur chose it, its title (the note's files are renamed to match; a title you typed stays).
+        <span class="ui">Open the notes</span> shows it.</p>
+      <p>After 14 days the meeting's working audio is deleted, unless you marked it <a href="#keep-recording">Keep
+        recording</a>. You can still name its speakers then, but you can't play or remember their voices.</p>
+
+      <h3 id="people-folder">The people folder</h3>
+      <p>Everyone you name with <span class="ui">Remember</span> is kept in your people folder: one small file per person,
+        holding their voiceprints and one short reference clip. It's on this PC unless you choose another folder.</p>
+      <ul>
+        <li><strong>Several PCs:</strong> point them all at one folder that syncs, such as OneDrive, and they share everyone you've named.</li>
+        <li><strong>A PC that can't reach it:</strong> <span class="ui">Export people…</span> on one PC,
+          <span class="ui">Import people…</span> on the other. The zip holds voiceprints and voice clips, so keep it private
+          and delete it once it's imported.</li>
+        <li><strong>Deleting someone</strong> removes their voiceprints and clips at once.</li>
+      </ul>
+      <div class="callout privacy">
+        <span class="label">Voiceprints are biometric data</span>
+        <p>Some laws (for example Illinois' BIPA and the GDPR) treat voiceprints as biometric data. That's why voice
+          recognition is off until you turn it on, why nobody's voice is remembered unless you name them, and why Lemur asks
+          by default whether they agreed. On the People tab, <span class="ui">Using this at work? What to tell your IT
+          department</span> gives you a summary to pass on.</p>
+      </div>
+    </section>
+
+    <!-- ===================================================== Settings -->
+    <section aria-labelledby="settings">
+      <h2 id="settings">Settings</h2>
+      <p>Open Settings from the tray menu (<span class="ui">Settings…</span>) or the Recordings window. It has six tabs.
+        <span class="ui">Save</span> checks your changes and applies them at once; <span class="ui">Cancel</span> throws them
+        away. Keys and people are different: they're saved the moment you change them. The <span class="ui">Help</span> link
+        at the bottom opens the part of this manual for the tab you're on.</p>
+
+      <h3 id="settings-account">Account</h3>
+      <p>Where your recordings are turned into text and notes.</p>
+      <figure>
+        <img src="img/settings-account.png" alt="The Account tab: your name, the transcription server type and address, the summary model, the keys, Test connection, and the setup file buttons.">
+        <figcaption>The Account tab.</figcaption>
+      </figure>
+      <dl class="defs">
+        <dt>Your name</dt><dd>How you're named in transcripts and notes.</dd>
+        <dt>Server type</dt><dd><span class="ui">Scriberr</span> (the tested choice: it also tells voices apart) or
+          <span class="ui">LiteLLM / OpenAI-compatible</span>.</dd>
+        <dt>Server URL</dt><dd>For Scriberr, the site's address without <code>/api/v1</code>. For an OpenAI-compatible
+          server, its address ending in <code>/v1</code>.</dd>
+        <dt>Profile, Summary model, Template</dt><dd>Scriberr only, all optional. The transcription profile (blank = the one
+          marked default in Scriberr), the model Scriberr summarizes with (blank = Scriberr's default), and a summary
+          template to file summaries under.</dd>
+        <dt>Model, Language</dt><dd>OpenAI-compatible only: the transcription model, and a language code such as
+          <code>en</code> (blank = detect it).</dd>
+        <dt>Summary model</dt><dd>Address, model and key of the AI model behind an OpenAI-compatible API. With Scriberr,
+          Scriberr writes the summary and this model only names people who introduce themselves; leave it blank to skip
+          that. Otherwise it writes the summary too.</dd>
+        <dt>Key</dt><dd>Click <span class="ui">Change…</span> and paste the key. It goes straight into Windows Credential
+          Manager and shows as <span class="ui">•••••••• saved</span>. If two servers are on the same host, Lemur offers
+          to use the same key for both.</dd>
+        <dt>Voiceprints key</dt><dd>Only needed for voice recognition, and only if the voiceprint model isn't on the summary
+          model's server (then the summary key is used).</dd>
+        <dt>Test connection</dt><dd>Checks each server that's switched on, using what's in the window.</dd>
+        <dt>Import setup file… / Export setup file…</dt><dd>Moves these settings to another PC or a colleague. A
+          <code>.lemursetup</code> file holds server addresses and model names only: never keys, folders or devices, so
+          it's safe to send. Whoever imports it then saves their own key.</dd>
+      </dl>
+
+      <h3 id="settings-recording">Recording</h3>
+      <p>When to record, and from which microphone and speakers.</p>
+      <figure>
+        <img src="img/settings-recording.png" alt="The Recording tab: the option to record calls automatically, the list of call apps to watch, the start and stop timings, and the device choices.">
+        <figcaption>The Recording tab.</figcaption>
+      </figure>
+      <dl class="defs">
+        <dt>Start Lemur when I sign in to Windows</dt><dd>So Lemur is always there for your calls. The setup window asks
+          this on its last step; this is where you change it later.</dd>
+        <dt>Record calls automatically</dt><dd>Turns call detection on or off. You can always start or stop a
+          recording from the tray menu.</dd>
+        <dt>Watch</dt><dd>Which call apps to watch (the built-in list in <a href="#automatic">Calls, automatically</a>).
+          Untick the ones you don't use.</dd>
+        <dt>Start after</dt><dd>How long a call must hold the microphone first (3 seconds). Filters out blips.</dd>
+        <dt>Stop after</dt><dd>How long after the call lets go of the microphone (15 seconds). Rides out switching headsets.</dd>
+        <dt>Shortest call kept</dt><dd>Shorter automatic recordings are thrown away (60 seconds).</dd>
+        <dt>Record from</dt><dd><span class="ui">Follow the call (recommended)</span> records the microphone and headset the
+          call really uses. <span class="ui">Windows default</span> uses whatever Windows is set to when the recording
+          starts. <span class="ui">This device:</span> picks a microphone and speakers by name; part of the name
+          ("Arctis") is enough.</dd>
+        <dt>Keep the other side's audio flowing during silences</dt><dd>Recommended. Plays inaudible silence on the speakers
+          while recording, because otherwise Windows stops sending the call's sound when nobody talks.</dd>
+        <dt>Import from</dt><dd>Under <span class="ui">Recordings from elsewhere</span>: a folder Lemur watches for recordings
+          to make notes from, such as one your phone's voice memos sync to (<a href="#importing">From your phone or another
+          recorder</a>). Blank means none. It can't be your notes folder, whose MP3s Lemur would import again.</dd>
+      </dl>
+
+      <h3 id="settings-notes">Notes</h3>
+      <p>Where your meeting notes go, and how long audio is kept.</p>
+      <figure>
+        <img src="img/settings-notes.png" alt="The Notes tab: the notes folder, whether the meeting file includes the transcript, the summary prompt choice, how many days to keep audio, whether each note's MP3 is deleted too, and the recordings folder.">
+        <figcaption>The Notes tab.</figcaption>
+      </figure>
+      <dl class="defs">
+        <dt>Notes folder</dt><dd>Where each meeting's note, page and MP3 go. A OneDrive folder lets you read them on any device.</dd>
+        <dt>Meeting file</dt><dd><span class="ui">Include the transcript</span> (ticked to begin with) puts the whole
+          transcript in the <a href="#meeting-file">meeting file</a> beside each note. Untick it when a program that reads
+          those files, an assistant that picks up your action items say, uses a model on the internet: the files then keep
+          the summary, action items and people, but not what was said line by line. The note itself keeps its
+          transcript.</dd>
+        <dt>Prompt</dt><dd>The instructions the summary model gets. <span class="ui">Built-in</span>, or
+          <span class="ui">Custom file:</span> a <code>.txt</code> or <code>.md</code> file of your own. <span class="ui">Edit…</span>
+          makes you a copy of the built-in one to change. <code>{name}</code> in your file becomes your name and
+          <code>{date}</code> the meeting's day (<code>Wednesday 2026-10-14</code>). Keep the part that asks for a
+          <code>Title:</code> and an <code>About:</code> line first: they give each meeting its title and one-line
+          description. Without them, Lemur asks the summary model for those separately. Keep the action items' form too
+          (<code>- [ ] owner - task - due date [time]</code>), or the <a href="#meeting-file">meeting file</a> can't tell
+          whose they are.</dd>
+        <dt>Keep audio for</dt><dd>The working audio Lemur makes notes from is deleted this many days after the note is made
+          (14 by default), or tick <span class="ui">forever</span>. A meeting you mark <a href="#keep-recording">Keep
+          recording</a> in the Recordings window keeps its audio, however old it gets.</dd>
+        <dt>Delete each note's MP3 too</dt><dd>Off to begin with: each note keeps its own MP3 until you delete the note. Tick
+          it, and each MP3 goes with the working audio, to the Recycle Bin (on a network folder, which has none, Windows
+          deletes it; one that's open in a player waits for the next try). The note and its transcript stay; the page is made again without its player, and the
+          <a href="#meeting-file">meeting file</a> says there's no audio. Meetings marked Keep recording keep theirs.
+          Turning it on, or saving fewer days while it's on, deletes the MP3s of meetings already older than that, so
+          Lemur counts them and asks first; <span class="ui">No</span> leaves the setting as it was. It's greyed out while
+          <span class="ui">forever</span> is ticked.</dd>
+        <dt>Recordings</dt><dd>Where audio waits until it's turned into notes. Blank = the default, shown in grey.</dd>
+      </dl>
+
+      <h3 id="settings-vocabulary">Vocabulary</h3>
+      <p>Words and names your transcription gets wrong, and how to write them.</p>
+      <figure>
+        <img src="img/settings-vocabulary.png" alt="The Vocabulary tab: a table of correct spellings and what each is misheard as, such as Northwind Traders misheard as North Wind Traders and Northwind Traitors, and a Remove button.">
+        <figcaption>The Vocabulary tab.</figcaption>
+      </figure>
+      <dl class="defs">
+        <dt>Correct spelling</dt><dd>How the word or name should be written. When a meeting's transcript has a word from
+          here, your summary model is told how it's spelled. Words the meeting doesn't have aren't sent, so the summary
+          can't mention them.</dd>
+        <dt>Misheard as</dt><dd>What the transcription writes instead, separated by commas. Each one is fixed in every new
+          meeting's transcript before its speakers are named and its summary is written. Leave it empty for a word that's
+          only spelled out for the summary model, such as an acronym.</dd>
+        <dt>Remove</dt><dd>Takes the selected rows out. Notes already fixed stay fixed.</dd>
+      </dl>
+      <p>When you save, Lemur looks for the words you added in meetings already made and offers to fix them there too.</p>
+      <p>Your transcription server may also be told to listen for these words: a Whisper model gets them as a hint. NVIDIA's
+        Parakeet, which Scriberr uses for fast transcription, can't take hints, so with it Lemur fixes the words afterwards.
+        The <a href="self-hosting.html#vocabulary">self-hosting guide</a> has the details.</p>
+
+      <h3 id="settings-people">People</h3>
+      <p>Real names in your notes instead of "Speaker B". See <a href="#naming">Naming speakers</a> for how it works.</p>
+      <figure>
+        <img src="img/settings-people.png" alt="The People tab: the option to recognise people by their voice, the naming level from Careful to Eager, introductions, the people folder, and the list of people you've named.">
+        <figcaption>The People tab.</figcaption>
+      </figure>
+      <dl class="defs">
+        <dt>Recognise people by their voice</dt><dd>Off by default. Keeps a voiceprint of each person you name, only in your
+          own people folder.</dd>
+        <dt>Server URL, Model</dt><dd>The voiceprint model's address (blank = the summary model's server) and its name
+          (<code>speaker-embed-local</code> unless your server says otherwise).</dd>
+        <dt>Naming</dt><dd>From <span class="ui">Careful</span> (the fewest wrong names) to <span class="ui">Eager</span>
+          (more names, wrong more often). Start with Careful.</dd>
+        <dt>Learn my voice from calls</dt><dd>Adds to your own voiceprint after each call, so you're recognised in person too.</dd>
+        <dt>Ask before remembering someone's voice</dt><dd>Before a new voice is remembered, you're asked whether that person agreed.</dd>
+        <dt>Name people who introduce themselves</dt><dd>Uses the summary model only, so it works with voice recognition
+          off. It names them in that meeting's note and never remembers a voice by itself.</dd>
+        <dt>People folder</dt><dd>Where the people you've named are kept. <span class="ui">Change…</span> or
+          <span class="ui">Use OneDrive</span> to move it (Lemur offers to copy everyone across), and
+          <span class="ui">Export people…</span> / <span class="ui">Import people…</span> for a PC that can't reach it.</dd>
+        <dt>People you've named</dt><dd>Everyone in the folder, with how many voiceprints each has and whether they agreed.
+          Select someone to <span class="ui">Rename…</span>, <span class="ui">Merge into…</span> someone else,
+          <span class="ui">Delete…</span>, or <span class="ui">Add sample from file…</span> (a recording of them talking
+          alone). Their voiceprints are listed underneath, with <span class="ui">▶ Play</span> and
+          <span class="ui">Delete voiceprint…</span>.</dd>
+      </dl>
+
+      <h3 id="settings-about">About</h3>
+      <figure>
+        <img src="img/settings-about.png" alt="The About tab: the version, links to the settings file, logs, people, notes and recordings folders, links to the help pages, and the Copy diagnostics button.">
+        <figcaption>The About tab.</figcaption>
+      </figure>
+      <dl class="defs">
+        <dt>Version</dt><dd>Lemur's version and the .NET version it runs on.</dd>
+        <dt>Where things are</dt><dd>Links to the settings file and the logs, people, notes and recordings folders. Keys are
+          in Windows Credential Manager as <code>Lemur:&lt;name&gt;</code>.</dd>
+        <dt>Help</dt><dd>This manual, the <a href="self-hosting.html">self-hosting guide</a> and the <a href="index.html">overview</a>.</dd>
+        <dt>Copy diagnostics</dt><dd>Copies your settings, any setup problems and the last 50 log lines to the clipboard,
+          for a bug report. Keys are removed, and transcripts are never in it.</dd>
+      </dl>
+
+      <h3 id="settings-file">The settings file</h3>
+      <p>Everything in Settings is saved in <code>%APPDATA%\Lemur\settings.json</code>. <span class="ui">Open settings file</span>
+        at the bottom of the Settings window opens it. If you edit it by hand, choose <span class="ui">Reload settings</span>
+        from the tray menu. A few things are only in the file:</p>
+      <div class="table-wrap">
+        <table class="compact">
+          <thead><tr><th>Setting</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr><td><code>summary.maxTokens</code></td><td>16384</td><td>Room for the summary model's answer, including its
+              thinking. A local reasoning model can need 32768.</td></tr>
+            <tr><td><code>detection.joinScreenTitleContains</code></td><td><code>Meeting join</code></td><td>What Teams' join
+              screen is called in its window title; used to split <a href="#back-to-back">back-to-back meetings</a>.</td></tr>
+            <tr><td><code>detection.sources</code></td><td>the built-in list</td><td>The call apps to watch. You can add your
+              own rules here.</td></tr>
+            <tr><td><code>speakers.level</code></td><td>1</td><td>The naming level, 1 (Careful) to 5 (Eager).</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Keys never go in this file. It only names them; their values are in Credential Manager.</p>
+    </section>
+
+    <!-- ===================================================== Privacy -->
+    <section aria-labelledby="privacy">
+      <h2 id="privacy">Your data and privacy</h2>
+      <p>Lemur sends a meeting only to the servers in your settings. Here is everything it keeps, and for how long:</p>
+      <div class="table-wrap">
+        <table class="compact">
+          <thead><tr><th>What</th><th>Where</th><th>Kept</th></tr></thead>
+          <tbody>
+            <tr><td>Working audio: your microphone, the call, the mix, and that meeting's voiceprints</td>
+              <td><code>%LOCALAPPDATA%\Lemur\recordings</code></td><td>14 days after the note is made (Notes tab), then deleted; meetings marked <a href="#keep-recording">Keep recording</a> keep it</td></tr>
+            <tr><td>Transcript, speaker data and progress of each meeting</td><td>the same folder</td><td>until you delete them (Recordings window → <span class="ui">Delete…</span>)</td></tr>
+            <tr><td>Notes: <code>.md</code>, <code>.html</code>, <code>.mp3</code> and <code>.json</code></td><td><code>Documents\Meeting Notes</code></td><td>until you delete them; the <code>.mp3</code> goes with the working audio if you tick <span class="ui">Delete each note's MP3 too</span> (Notes tab), unless the meeting is marked Keep recording</td></tr>
+            <tr><td>Recordings you imported from the import folder</td><td>its <strong>Imported</strong> folder</td><td>until you delete them (Lemur only moves them there)</td></tr>
+            <tr><td>People you've named: voiceprints and one clip each</td><td>your people folder (<code>%APPDATA%\Lemur\people</code> unless you chose another)</td><td>until you delete them</td></tr>
+            <tr><td>Settings</td><td><code>%APPDATA%\Lemur\settings.json</code></td><td>until you uninstall and delete it</td></tr>
+            <tr><td>Keys</td><td>Windows Credential Manager, <code>Lemur:&lt;name&gt;</code></td><td>until you remove them</td></tr>
+            <tr><td>Logs</td><td><code>%LOCALAPPDATA%\Lemur\logs</code></td><td>never hold transcript text or keys</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>What leaves your PC, and where it goes:</p>
+      <ul>
+        <li><strong>The meeting's audio</strong> (one mixed file) goes to your transcription server. Scriberr keeps it, with
+          the transcript and summary, until it's deleted there.</li>
+        <li><strong>The labelled transcript</strong> goes to your summary model.</li>
+        <li><strong>Short voice clips</strong> go to the voiceprint service, only when voice recognition is on. It keeps
+          nothing.</li>
+      </ul>
+      <p>A program you let read your notes folder sees what's in it. If it uses a model on the internet, untick
+        <span class="ui">Include the transcript</span> (<a href="#settings-notes">Notes tab</a>) and give it only the
+        <code>.json</code> files: they then hold the summary and action items, not the conversation.</p>
+      <div class="callout privacy">
+        <span class="label">Keeping it local</span>
+        <p>Lemur has no cloud service of its own and sends nothing anywhere else. Whether your meetings stay on your
+          network depends on where those servers are. The <a href="self-hosting.html#local">self-hosting guide</a> covers
+          how to keep them local.</p>
+      </div>
+    </section>
+
+    <!-- ===================================================== Troubleshooting -->
+    <section aria-labelledby="troubleshooting">
+      <h2 id="troubleshooting">Troubleshooting</h2>
+
+      <h3 id="ts-no-recording">A call wasn't recorded</h3>
+      <ul>
+        <li>Check the tray icon's status line. <span class="ui">Auto-record paused</span> or <span class="ui">Not recording
+          this call (you stopped it)</span> explain themselves.</li>
+        <li>Check the Recording tab: <span class="ui">Record calls automatically</span> on, and the app ticked under
+          <span class="ui">Watch</span>.</li>
+        <li>In a browser, the call's tab must be the one showing in its window.</li>
+        <li>Under 60 seconds? It was thrown away (<span class="ui">Recording not kept</span>).</li>
+        <li>Run <code>llmmr detect</code> in a terminal during a call. Once a second, it shows which apps hold the
+          microphone and what Lemur makes of them. Use <span class="ui">Start recording now</span> meanwhile.</li>
+      </ul>
+
+      <h3 id="ts-cant-hear-me">Nobody on a browser call can hear me</h3>
+      <p>A call in a browser (Zoom, Meet) starts on Windows' default microphone. If that's <span class="ui">Stereo
+        Mix</span>, the call hears your PC's own sound instead of you, and Lemur records what the call hears. Pick your
+        microphone in the call's settings, or set it as the default in Windows: Settings → System → Sound → Input.</p>
+
+      <h3 id="ts-no-notes">Notes didn't appear</h3>
+      <ul>
+        <li>Open the <a href="#recordings">Recordings window</a>. The meeting's status and steps show where it stopped and why.</li>
+        <li>A server that's down or unreachable is retried after 1, 5 and 15 minutes, then hourly. Click
+          <span class="ui">Retry now</span> once it's back.</li>
+        <li>Check the addresses and keys: Settings → Account → <span class="ui">Test connection</span>.</li>
+        <li>Working from home? You may need your VPN to reach the servers.</li>
+      </ul>
+
+      <h3 id="ts-summary">"No summary came back" on long meetings</h3>
+      <p>With Scriberr, Scriberr gives the summary model 5 minutes, then gives up. If your model needs longer for a long
+        meeting, every retry hits the same limit. Use a faster summary model (see the
+        <a href="self-hosting.html#summary-model">self-hosting guide</a>).</p>
+
+      <h3 id="ts-introductions">"Introductions skipped: the model used all … of summary.maxTokens"</h3>
+      <p>Your summary model thinks before it answers, and ran out of room. Raise <code>summary.maxTokens</code> in the
+        <a href="#settings-file">settings file</a> (to 32768 for a local reasoning model), then <span class="ui">Reload
+        settings</span>.</p>
+
+      <h3 id="ts-wrong-voice">Other people's lines are marked as mine</h3>
+      <p>Their voices are reaching your microphone, for example from laptop speakers. A headset, or a speakerphone with
+        echo cancellation, keeps them out.</p>
+
+      <h3 id="ts-my-lines">A few of my words are under "Speaker B"</h3>
+      <p>Where you and someone else talk at the same moment, the louder track gets the words, and the call usually comes
+        through louder than your microphone. Expect a few short lines like that in a meeting. Scriberr times every word, so
+        Lemur can split a line between you; with a transcription server that doesn't, each line goes whole to whoever said
+        most of it.</p>
+
+      <h3 id="ts-other">Other questions</h3>
+      <dl class="defs">
+        <dt>Sounds that weren't the call are in the transcript</dt><dd>Everything playing on the call's headset or speakers
+          is recorded. Pause videos and music during calls.</dd>
+        <dt>The note page has no player</dt><dd>The MP3 isn't beside the page (moved or deleted, or Lemur deleted it after 14
+          days because <span class="ui">Delete each note's MP3 too</span> is ticked), or Windows couldn't make one: Windows
+          "N" editions need the Media Feature Pack.</dd>
+        <dt>The browser asks to open Lemur</dt><dd>That's a <span class="ui">Name speakers</span> link, or a
+          <a href="#note-links">link to a meeting</a>. Allow it.</dd>
+        <dt>Starting Lemur opens the Recordings window</dt><dd>It's already running. Only one copy runs at a time.</dd>
+        <dt>Lemur doesn't start when I sign in</dt><dd>Tick <span class="ui">Start Lemur when I sign in to Windows</span> on
+          the <a href="#settings-recording">Recording tab</a>. Task Manager → Startup apps lists it too.</dd>
+        <dt>Reporting a problem</dt><dd>Settings → About → <span class="ui">Copy diagnostics</span>, and paste it into your
+          message. The tray menu's <span class="ui">Open log folder</span> has the full logs.</dd>
+      </dl>
+    </section>
+
+    <!-- ===================================================== Command line -->
+    <section aria-labelledby="command-line">
+      <h2 id="command-line">Command line: llmmr</h2>
+      <p><code>llmmr</code> is Lemur's engine without the tray: setup, diagnosis and testing. It's installed beside Lemur and
+        works in any terminal opened after installing. <code>llmmr --help</code> lists everything.</p>
+      <div class="table-wrap">
+        <table class="compact">
+          <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr><td><code>llmmr settings</code></td><td>Shows the settings path and anything missing (<code>status: ready</code> when complete)</td></tr>
+            <tr><td><code>llmmr set-secret &lt;name&gt;</code></td><td>Stores a key read from standard input (pipe it in, as below). Lemur never prints it.</td></tr>
+            <tr><td><code>llmmr secret-status &lt;name&gt;</code></td><td>Says whether a key is stored</td></tr>
+            <tr><td><code>llmmr devices</code></td><td>Lists microphones and outputs, and the Windows defaults</td></tr>
+            <tr><td><code>llmmr detect [--seconds N]</code></td><td>Shows what call detection sees, once a second. Run it during a call that doesn't record.</td></tr>
+            <tr><td><code>llmmr selftest [--mic name]</code></td><td>Plays three soft beeps while recording and checks both tracks line up</td></tr>
+            <tr><td><code>llmmr record --seconds N [--title T] [--process]</code></td><td>A recording from the command line (WAV only)</td></tr>
+            <tr><td><code>llmmr make-test-recording --mic a.wav --others b.wav</code></td><td>Builds a recording from existing audio, for testing</td></tr>
+            <tr><td><code>llmmr import &lt;file&gt; [--title T] [--started "2026-10-14 09:30"]</code></td><td>Makes a meeting from a recording made elsewhere, as <span class="ui">Import…</span> does. Lemur makes its notes. A file imported before is refused unless you add <code>--again</code>.</td></tr>
+            <tr><td><code>llmmr process &lt;folder&gt; [--from …] [--notes &lt;folder&gt;]</code></td><td>Runs the notes steps on a recording again, from a given step</td></tr>
+            <tr><td><code>llmmr rename &lt;recording&gt; "&lt;title&gt;"</code></td><td>Gives a meeting a new title; its note's files are renamed to match</td></tr>
+            <tr><td><code>llmmr keep &lt;recording&gt; [--off]</code></td><td>Marks a meeting <a href="#keep-recording">Keep recording</a>, as the Recordings window's box does; <code>--off</code> unticks it. Safe while Lemur runs.</td></tr>
+            <tr><td><code>llmmr export &lt;recording&gt; [--out &lt;folder&gt;] [--transcript | --no-transcript]</code></td><td>Writes the meeting's <a href="#meeting-file">meeting file</a> (beside its note, or into that folder) and prints where. The transcript is in it as the Notes tab says; with <code>--out</code>, either flag decides instead.</td></tr>
+            <tr><td><code>llmmr describe &lt;recording&gt; [--show] [--apply]</code></td><td>Asks your summary model for a meeting's title and one-line description, from its summary. <code>--show</code> prints them; <code>--apply</code> keeps them, and titles a meeting that had no title (unless you edited its note).</td></tr>
+            <tr><td><code>llmmr remake &lt;recording&gt; …</code></td><td>Makes finished meetings' notes again with this version of Lemur:
+              transcript (fetched again from Scriberr), who said what, speaker names, summary and note. Keeps titles, the names you
+              gave and where each note is, and puts a backup of the old files in the recording's folder. Only for notes you haven't
+              edited. Safe while Lemur runs.</td></tr>
+            <tr><td><code>llmmr vocab list|add|remove</code></td><td>Your vocabulary: <code>llmmr vocab add "Kubernetes" "Cooper Netties"</code></td></tr>
+            <tr><td><code>llmmr vocab fix &lt;recording&gt; | --all</code></td><td>Fixes the vocabulary's words in meetings already made</td></tr>
+            <tr><td><code>llmmr identify &lt;recording&gt;</code></td><td>Re-runs speaker naming and prints what it found (notes unchanged)</td></tr>
+            <tr><td><code>llmmr people list|name|rename|merge|delete|export|import</code></td><td>The people you've named</td></tr>
+            <tr><td><code>llmmr voices calibrate</code></td><td>Shows which voiceprint model your server runs, and whether Lemur has matching numbers for it</td></tr>
+            <tr><td><code>llmmr voices benchmark …</code></td><td>Works out matching numbers for a new voiceprint model from test meetings</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>To store a key without it showing on screen or landing in your history, copy it, then:</p>
+      <pre><code>Get-Clipboard | llmmr set-secret summary-api-key</code></pre>
+      <div class="callout warn">
+        <span class="label">Don't process Lemur's own recordings while it runs</span>
+        <p><code>llmmr process</code> on a folder in Lemur's recordings folder puts it back in Lemur's queue too, and both
+          work on it at once. Quit Lemur first, or copy the folder somewhere else and add <code>--notes &lt;a test folder&gt;</code>
+          so the test note doesn't land among your real notes.</p>
+      </div>
+    </section>
+
+    <!-- ===================================================== Uninstall -->
+    <section aria-labelledby="uninstall">
+      <h2 id="uninstall">Uninstalling</h2>
+      <p>Open Windows <strong>Settings → Apps → Installed apps</strong>, find <strong>Lemur</strong> and choose
+        <span class="ui">Uninstall</span>. If Lemur is running, it's closed first, and its start-at-sign-in entry is
+        removed.</p>
+      <p>Your own data stays, in case you reinstall. To remove it too, delete:</p>
+      <ul>
+        <li><code>%APPDATA%\Lemur</code>: settings and, by default, the people folder.</li>
+        <li><code>%LOCALAPPDATA%\Lemur</code>: recordings and logs.</li>
+        <li>Your notes in <code>Documents\Meeting Notes</code>, if you don't want them.</li>
+        <li>A people folder elsewhere (OneDrive, for example), if you chose one.</li>
+        <li>Your keys: Control Panel → Credential Manager → Windows Credentials, the entries starting
+          <code>Lemur:</code>. Or in a terminal: <code>cmdkey /list</code>, then <code>cmdkey /delete:Lemur:&lt;name&gt;</code>
+          for each.</li>
+      </ul>
+      <p>Your servers keep their own copies: delete the meetings in Scriberr too if you no longer want them.</p>
+    </section>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="inner">
+    <span>Lemur 1.2 · LLM Meeting Recorder</span>
+    <a href="index.html">Overview</a>
+    <a href="self-hosting.html">Self-hosting guide</a>
+  </div>
+</footer>
+</body>
+</html>

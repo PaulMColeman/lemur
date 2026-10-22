@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Lemur's installer (WiX 6): a per-user MSI. No admin rights: it installs into %LOCALAPPDATA%\Programs\Lemur, adds Start
+  menu shortcuts and puts the folder on the user's PATH (for llmmr). Built by build.ps1, which publishes the app
+  self-contained into $(var.AppDir) first. Settings, recordings, notes and keys are the user's: uninstalling leaves them.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+  <Package Name="Lemur"
+           Manufacturer="Lemur"
+           Version="$(var.Version)"
+           UpgradeCode="C2875FD4-0C04-42D1-88D7-E77869602DA7"
+           Scope="perUser"
+           Compressed="yes"
+           Language="1033">
+
+    <SummaryInformation Description="Lemur - LLM Meeting Recorder" Manufacturer="Lemur" />
+    <MajorUpgrade AllowSameVersionUpgrades="yes"
+                  DowngradeErrorMessage="A newer version of Lemur is already installed." />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <Icon Id="LemurIcon" SourceFile="$(var.AssetsDir)\lemur.ico" />
+    <Property Id="ARPPRODUCTICON" Value="LemurIcon" />
+    <Property Id="ARPCOMMENTS" Value="LLM Meeting Recorder: records your calls and turns them into notes on your own servers." />
+    <Property Id="ARPNOREPAIR" Value="1" />
+
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="UserProgramsFolder" Name="Programs">
+        <Directory Id="INSTALLFOLDER" Name="Lemur" />
+      </Directory>
+    </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder" />
+
+    <Feature Id="Main" Title="Lemur" Level="1">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentRef Id="LemurExe" />
+      <ComponentRef Id="Shortcuts" />
+      <ComponentRef Id="UserPath" />
+      <ComponentRef Id="LinkSchemes" />
+    </Feature>
+
+    <!-- Everything dotnet publish produced (the .NET runtime included), except Lemur.exe, which has its own component. -->
+    <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+      <Files Include="$(var.AppDir)\**">
+        <Exclude Files="$(var.AppDir)\Lemur.exe" />
+      </Files>
+    </ComponentGroup>
+
+    <!-- Per-user components keep their key path in HKCU (Windows Installer's rule for files in the user profile). -->
+    <Component Id="LemurExe" Directory="INSTALLFOLDER" Guid="5A3B8E4C-2F1D-4C6B-9E7A-1D2C3B4A5F60">
+      <File Id="LemurExe" Source="$(var.AppDir)\Lemur.exe" />
+      <RegistryValue Root="HKCU" Key="Software\Lemur" Name="InstallFolder" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
+      <RemoveFolder Id="RemoveInstallFolder" Directory="INSTALLFOLDER" On="uninstall" />
+    </Component>
+
+    <Component Id="Shortcuts" Directory="ProgramMenuFolder" Guid="0E7D2B6A-4C1F-4D8E-A3B5-6F7A8B9C0D12">
+      <Shortcut Id="LemurShortcut" Name="Lemur" Description="LLM Meeting Recorder: records your calls and turns them into notes"
+                Target="[INSTALLFOLDER]Lemur.exe" WorkingDirectory="INSTALLFOLDER" Icon="LemurIcon" />
+      <Shortcut Id="HelpShortcut" Name="Lemur Help" Description="How to use Lemur and run its servers"
+                Target="[INSTALLFOLDER]Lemur.exe" Arguments="--help" WorkingDirectory="INSTALLFOLDER" Icon="LemurIcon" />
+      <RegistryValue Root="HKCU" Key="Software\Lemur" Name="Shortcuts" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+
+    <!-- llmmr in any new terminal. -->
+    <Component Id="UserPath" Directory="INSTALLFOLDER" Guid="9B1C3D5E-7F80-4A2B-8C4D-6E8F0A1B2C34">
+      <Environment Id="UserPathEntry" Name="PATH" Value="[INSTALLFOLDER]" Part="last" Action="set" System="no" Permanent="no" />
+      <RegistryValue Root="HKCU" Key="Software\Lemur" Name="Path" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+
+    <!-- The "Name speakers" links in meeting pages: lemur:// and, for pages written before 1.0, teamsrecorder://.
+         The app writes the same values at every start; owning them here means uninstalling removes them. -->
+    <Component Id="LinkSchemes" Directory="INSTALLFOLDER" Guid="3F5A7B9C-1D2E-4F60-8A1B-2C3D4E5F6A78">
+      <RegistryKey Root="HKCU" Key="Software\Classes\lemur">
+        <RegistryValue Type="string" Value="URL:Lemur" KeyPath="yes" />
+        <RegistryValue Name="URL Protocol" Type="string" Value="" />
+        <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[INSTALLFOLDER]Lemur.exe&quot; &quot;%1&quot;" />
+      </RegistryKey>
+      <RegistryKey Root="HKCU" Key="Software\Classes\teamsrecorder">
+        <RegistryValue Type="string" Value="URL:Lemur" />
+        <RegistryValue Name="URL Protocol" Type="string" Value="" />
+        <RegistryValue Key="shell\open\command" Type="string" Value="&quot;[INSTALLFOLDER]Lemur.exe&quot; &quot;%1&quot;" />
+      </RegistryKey>
+    </Component>
+
+    <!-- A running Lemur is asked to finish any recording and exit before its files are replaced or removed. -->
+    <CustomAction Id="QuitLemur" Directory="INSTALLFOLDER" ExeCommand="&quot;[INSTALLFOLDER]Lemur.exe&quot; --quit"
+                  Execute="immediate" Return="ignore" Impersonate="yes" />
+    <!-- Uninstalling: the app's own "start when I sign in" entry goes too. -->
+    <CustomAction Id="UnregisterLemur" Directory="INSTALLFOLDER" ExeCommand="&quot;[INSTALLFOLDER]Lemur.exe&quot; --unregister"
+                  Execute="deferred" Return="ignore" Impersonate="yes" />
+    <CustomAction Id="LaunchLemur" FileRef="LemurExe" ExeCommand="" Execute="immediate" Return="asyncNoWait" Impersonate="yes" />
+
+    <InstallExecuteSequence>
+      <Custom Action="QuitLemur" Before="InstallValidate" Condition="Installed OR WIX_UPGRADE_DETECTED" />
+      <Custom Action="UnregisterLemur" Before="RemoveFiles" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
+    </InstallExecuteSequence>
+
+    <!-- One page (what you're agreeing to: tell people you're recording), then progress, then "Start Lemur now". -->
+    <ui:WixUI Id="WixUI_Minimal" />
+    <WixVariable Id="WixUILicenseRtf" Value="$(sys.SOURCEFILEDIR)Agreement.rtf" />
+    <WixVariable Id="WixUIBannerBmp" Value="$(var.AssetsDir)\wix-banner.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="$(var.AssetsDir)\wix-dialog.bmp" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Start Lemur now" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
+    <UI>
+      <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="LaunchLemur"
+               Condition="WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 AND NOT Installed" />
+    </UI>
+  </Package>
+</Wix>

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <!--
+      Build for the machine's own RID unless one is given (Docker passes -r linux-x64). Without it
+      every RID's native sherpa-onnx/onnxruntime libraries (~9 platforms) land in bin/.
+    -->
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">$(NETCoreSdkRuntimeIdentifier)</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 1.13.8 published 2026-09-11; pulls org.k2fsa.sherpa.onnx.runtime.<rid> 1.13.8 (win-x64, linux-x64, ...). -->
+    <PackageReference Include="org.k2fsa.sherpa.onnx" Version="1.13.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Voiceprint.Service.Tests" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>Lemur</AssemblyName>
+    <RootNamespace>Lemur.App</RootNamespace>
+    <ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Lemur.Core\Lemur.Core.csproj" />
+  </ItemGroup>
+
+  <!-- The lemur for the exe, the Start menu and windows (Ui.AppIcon); the tray keeps its status dots. -->
+  <PropertyGroup Condition="Exists('..\..\assets\lemur.ico')">
+    <ApplicationIcon>..\..\assets\lemur.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\assets\lemur.ico" LogicalName="Lemur.ico" Condition="Exists('..\..\assets\lemur.ico')" />
+    <!-- The help pages (HelpLink): docs\help in the repo, help\ beside the exe. -->
+    <Content Include="..\..\docs\help\**\*" LinkBase="help" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

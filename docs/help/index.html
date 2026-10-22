@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lemur Overview</title>
+<meta name="description" content="Lemur, the LLM Meeting Recorder: records your calls and in-person meetings on Windows and turns them into meeting notes on servers you run.">
+<link rel="icon" href="img/lemur-icon.svg">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html">
+      <img src="img/lemur-logo.svg" alt="">
+      <span><span class="name">Lemur</span><span class="brand-sub">LLM Meeting Recorder</span></span>
+    </a>
+    <nav class="site-nav" aria-label="Help pages">
+      <a href="index.html" aria-current="page">Overview</a>
+      <a href="manual.html">Manual</a>
+      <a href="self-hosting.html">Self-hosting</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="page">
+  <section class="hero">
+    <div>
+      <h1>LLMMR "Lemur"</h1>
+      <p class="subtitle">LLM Meeting recorder notes from your own servers</p>
+      <p class="lead">Lemur sits in the Windows system tray and records your calls by itself. When a call ends it turns
+        the recording into a note: a transcript with everyone labelled, and a summary of the action items, decisions and
+        open questions. The speech recognition and the AI that writes the summary run on servers you control, so your
+        meetings never go to a cloud service.</p>
+      <div class="actions">
+        <a class="btn" href="manual.html">Read the manual</a>
+        <a class="btn secondary" href="self-hosting.html">Run the servers</a>
+      </div>
+    </div>
+    <img class="logo-big" src="img/lemur-logo.svg" alt="">
+  </section>
+
+  <figure>
+    <img src="img/recordings.png" alt="The Recordings window: a search box and date filter over a list of meetings under headings (Today, Yesterday, Earlier this week, Last week), each meeting with its title and a line on what it was about. The selected one is being summarized, and its timeline shows mixing, transcribing and naming speakers done, summarizing in progress, and writing the note still to come.">
+    <figcaption>The Recordings window. Search every meeting, see what each was about, and follow the ones being turned into notes.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <h2 id="features">What it does</h2>
+    <div class="cards">
+      <div class="card">
+        <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span>
+        <h3>Records by itself</h3>
+        <p>Starts when a call takes your microphone and stops when it ends: Teams in Edge, Chrome or the Teams app. Google Meet, Zoom (the app or a browser) and GoTo Meeting are built in but not yet tried on real calls. A recording from your phone or another recorder becomes notes too: drop it on the Recordings window, or in a folder Lemur watches.</p>
+      </div>
+      <div class="card">
+        <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h2M7 8v8M11 5v14M15 8v8M19 10v4M21 12h0"/></svg></span>
+        <h3>Knows which voice is you</h3>
+        <p>Your microphone and the call's sound are recorded as two separate, aligned tracks. Comparing them tells Lemur which lines you said.</p>
+      </div>
+      <div class="card">
+        <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span>
+        <h3>Writes real notes</h3>
+        <p>A summary, action items with owners, decisions, open questions, and terms worth remembering, followed by the full transcript.</p>
+      </div>
+      <div class="card">
+        <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l5.5-3.5z"/></svg></span>
+        <h3>Click a line, hear it</h3>
+        <p>Each note is a Markdown file, a web page and an MP3. On the page, click any line of the transcript to hear it said.</p>
+      </div>
+      <div class="card">
+        <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg></span>
+        <h3>Finds it again</h3>
+        <p>Search every meeting's notes and transcript, and filter by date. Meetings sit under headings (today, last week,
+          each month) you can open and close. Each meeting gets a one-line description, and a title when the call app gave
+          it none.</p>
+      </div>
+      <div class="card">
+        <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.2c2.9.1 5 2.4 5 5.3"/></svg></span>
+        <h3>Names the people</h3>
+        <p>People who introduce themselves ("hi, it's Dana") are named in that meeting's note. If you turn it on, Lemur also learns voices you name, so it recognises them next time.</p>
+      </div>
+      <div class="card">
+        <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+        <h3>Stays on your network</h3>
+        <p>Recordings go only to the servers named in your settings. Keys are kept in Windows Credential Manager, never in a file.</p>
+      </div>
+    </div>
+
+    <h2 id="why-local">Why your own servers</h2>
+    <p>A meeting recording is about as private as data gets: what your colleagues and customers said, in their own voices.
+      Lemur doesn't send it to a cloud service. It sends it to the transcription and AI models <em>you</em> run, on your
+      own hardware or your organisation's. Nothing in the chain needs the internet once the models are downloaded.</p>
+    <p>The <a href="self-hosting.html">self-hosting guide</a> lists the models, the hardware they need and how to set them
+      up, with measured speeds from a working setup.</p>
+
+    <h2 id="how">How a meeting becomes a note</h2>
+    <ol class="numbered">
+      <li><strong>Record.</strong> Lemur notices a call taking your microphone and starts recording two tracks: your
+        microphone, and what your headset or speakers play.</li>
+      <li><strong>Transcribe.</strong> When the call ends, a mix of the two goes to your transcription server, which writes
+        down every word and works out who spoke when.</li>
+      <li><strong>Name the speakers.</strong> The two tracks show which lines are yours. Introductions, and voices you've
+        named before, name the others.</li>
+      <li><strong>Summarize.</strong> Your own AI model writes the summary, action items and decisions from the labelled transcript.</li>
+      <li><strong>Write the note.</strong> A Markdown file, a web page and an MP3 land in <code>Documents\Meeting Notes</code>.
+        A notification tells you they're ready.</li>
+    </ol>
+    <p>On the author's setup, a 48-minute call had its notes 6½ minutes after it ended.</p>
+
+    <h2 id="requirements">What you need</h2>
+    <h3>On your PC</h3>
+    <ul>
+      <li>Windows 10 (version 2004 or later) or Windows 11, 64-bit.</li>
+      <li>A microphone and a headset or speakers. Lemur records whichever devices your call uses.</li>
+      <li>No administrator rights: Lemur installs just for you.</li>
+    </ul>
+    <h3>On your network</h3>
+    <ul>
+      <li><strong>Transcription:</strong> <a href="self-hosting.html#scriberr">Scriberr</a> on a computer with an NVIDIA graphics card.</li>
+      <li><strong>Summaries:</strong> an AI model behind an OpenAI-compatible API (vLLM, llama.cpp, Ollama…). It needs a
+        graphics card or a machine with lots of unified memory.</li>
+      <li><strong>Optional:</strong> the small voiceprint service in this project, for recognising voices; LiteLLM, to put
+        everything behind one address with a key per person.</li>
+    </ul>
+    <p>Someone else may already run these for you. Then all you need is their address and your own key, or a
+      <code>.lemursetup</code> file from them.</p>
+
+    <h2 id="install">Install in three steps</h2>
+    <ol class="numbered">
+      <li><strong>Run <code>Lemur-1.2.0.msi</code>.</strong> It installs into your own profile, so it doesn't ask for an
+        administrator. Windows may warn that the publisher is unknown: choose <span class="ui">More info</span>, then
+        <span class="ui">Run anyway</span>.</li>
+      <li><strong>Let it start Lemur</strong> when it finishes. A setup window asks for your server's address and your key,
+        and tests the connection.</li>
+      <li><strong>Join a call.</strong> The tray icon turns red while it records. Notes appear in
+        <code>Documents\Meeting Notes</code> a few minutes after the call.</li>
+    </ol>
+    <p>The <a href="manual.html#install">manual</a> covers each step, upgrading from Teams Recorder (Lemur's earlier name),
+      and uninstalling.</p>
+
+    <div class="callout warn">
+      <span class="label">Tell people you're recording</span>
+      <p>Recording people without telling them can be against the law where you or they are. Some places (for example
+        Illinois and California) need everyone's consent, and your employer may have its own rules. Lemur reminds you each
+        time a recording starts.</p>
+    </div>
+
+    <h2 id="privacy">Privacy at a glance</h2>
+    <ul>
+      <li><strong>Audio</strong> goes to your transcription server, and only to the addresses in your settings.</li>
+      <li><strong>The working audio</strong> Lemur keeps on your PC is deleted 14 days after the notes are made (you can
+        change this, or tick <strong>Keep recording</strong> for a meeting you want to hear again). Each note keeps its own
+        MP3 until you delete the note, unless you choose to have it deleted with the audio.</li>
+      <li><strong>Keys</strong> live in Windows Credential Manager, never in a settings file.</li>
+      <li><strong>Voice recognition is off</strong> until you turn it on. When it's on, voiceprints of the people you name
+        are kept only in your people folder, and Lemur asks whether they agreed.</li>
+      <li><strong>Your transcription server keeps a copy.</strong> Scriberr keeps each meeting's audio, transcript and summary
+        until you delete them there.</li>
+    </ul>
+    <p>More in the manual: <a href="manual.html#privacy">your data and privacy</a>.</p>
+
+    <h2 id="credits">Credits and licences</h2>
+    <p>Lemur builds on these projects and models. Licences are as each project published them when this was written.
+      Check each model's own card or licence before you redistribute it.</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <thead><tr><th>Project or model</th><th>Used for</th><th>Licence</th></tr></thead>
+        <tbody>
+          <tr><td>NVIDIA Parakeet TDT 0.6B v3</td><td>Speech to text (on your Scriberr server)</td><td>CC-BY-4.0</td></tr>
+          <tr><td>pyannote speaker-diarization-community-1</td><td>Who spoke when (on your Scriberr server)</td><td>See its model card on Hugging Face (you accept its conditions to download it)</td></tr>
+          <tr><td>Scriberr</td><td>The transcription server</td><td>See the Scriberr repository</td></tr>
+          <tr><td>NVIDIA NeMo TitaNet-L, via sherpa-onnx's model release</td><td>Voiceprints (optional)</td><td>See the model's licence</td></tr>
+          <tr><td>WeSpeaker ResNet34, via sherpa-onnx's model release</td><td>An alternative voiceprint model</td><td>See the model's licence</td></tr>
+          <tr><td>sherpa-onnx and ONNX Runtime</td><td>Running the voiceprint model</td><td>Apache-2.0 and MIT</td></tr>
+          <tr><td>LiteLLM</td><td>One gateway for the models, with per-person keys</td><td>See the LiteLLM repository</td></tr>
+          <tr><td>NAudio</td><td>Recording and mixing on the PC</td><td>MIT</td></tr>
+          <tr><td>Markdig</td><td>Turning notes into web pages</td><td>BSD-2-Clause</td></tr>
+          <tr><td>Your summary model (for example Qwen)</td><td>Summaries and introductions</td><td>Whatever the model you choose says</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="inner">
+    <span>Lemur 1.2 · LLM Meeting Recorder</span>
+    <a href="manual.html">Manual</a>
+    <a href="self-hosting.html">Self-hosting guide</a>
+  </div>
+</footer>
+</body>
+</html>

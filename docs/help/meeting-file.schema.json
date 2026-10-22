@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lemur.meeting/1",
+  "title": "Lemur meeting file",
+  "description": "The .json Lemur writes beside each meeting note (manual: The meeting file). Fields may be added in later versions of the same format; a program should ignore what it doesn't know.",
+  "type": "object",
+  "required": ["format", "id", "title", "startedAt", "endedAt", "durationSeconds", "source", "recordedBy", "people",
+    "actionItemsFound", "actionItems", "decisions", "openQuestions", "summaryMarkdown"],
+  "if": { "not": { "required": ["transcript"] } },
+  "then": { "required": ["leftOut"], "properties": { "leftOut": { "contains": { "const": "transcript" } } } },
+  "properties": {
+    "format": { "const": "lemur.meeting/1" },
+    "id": {
+      "description": "The recording's name, which never changes, whatever the meeting is renamed to.",
+      "type": "string", "pattern": "^[0-9]{8}-[0-9]{6}(-[0-9]{1,3})?$"
+    },
+    "revision": {
+      "description": "Changes whenever anything else in the file does: an update, not a repeat.",
+      "type": ["string", "null"]
+    },
+    "revisedAt": {
+      "description": "When this revision was made. Given two copies, keep the newer.",
+      "type": ["string", "null"], "format": "date-time"
+    },
+    "title": { "type": "string" },
+    "description": { "description": "One sentence on what the meeting was about.", "type": ["string", "null"] },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "endedAt": { "type": "string", "format": "date-time" },
+    "durationSeconds": { "type": "number", "minimum": 0 },
+    "source": { "description": "Where it was recorded: \"Teams (Edge)\", \"Manual\", \"Imported\".", "type": "string" },
+    "recordedBy": { "description": "The user's name, as Lemur writes it in the note.", "type": "string" },
+    "people": {
+      "description": "Everyone heard: the user first, then by how long they talked.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "me", "seconds", "named"],
+        "properties": {
+          "name": { "type": "string" },
+          "me": { "description": "The user.", "type": "boolean" },
+          "seconds": { "description": "How long they talked.", "type": "integer", "minimum": 0 },
+          "named": { "description": "Named for sure: not \"Speaker E\", not a guess like \"Dana?\".", "type": "boolean" }
+        }
+      }
+    },
+    "summary": { "description": "The summary's Summary section.", "type": ["string", "null"] },
+    "actionItemsFound": {
+      "description": "The summary has action items in Lemur's form. When false (a custom prompt), owners can't be trusted.",
+      "type": "boolean"
+    },
+    "actionItems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "text", "ownerIsMe", "done"],
+        "properties": {
+          "id": {
+            "description": "\"<meeting id>/<number>\". The same item keeps it when the meeting changes (a name given, a word fixed); a number is never reused.",
+            "type": "string", "pattern": "^[0-9]{8}-[0-9]{6}(-[0-9]{1,3})?/[0-9]+$"
+          },
+          "text": { "description": "The task.", "type": "string" },
+          "owner": { "description": "Who committed to it, as the summary names them.", "type": ["string", "null"] },
+          "ownerIsMe": { "description": "The owner is the user, by name.", "type": "boolean" },
+          "due": { "description": "The day, when the words pin one down.", "type": ["string", "null"], "format": "date" },
+          "dueText": { "description": "The due date as written.", "type": ["string", "null"] },
+          "at": { "description": "Seconds into the meeting where it was agreed.", "type": ["integer", "null"], "minimum": 0 },
+          "link": {
+            "description": "Opens the note there, on a PC with Lemur.",
+            "type": ["string", "null"], "pattern": "^lemur://note/[0-9]{8}-[0-9]{6}(-[0-9]{1,3})?(\\?t=[0-9]{1,6})?$"
+          },
+          "done": { "description": "Ticked in the summary.", "type": "boolean" }
+        }
+      }
+    },
+    "link": {
+      "description": "Opens the meeting's note, on a PC with Lemur.",
+      "type": ["string", "null"], "pattern": "^lemur://note/[0-9]{8}-[0-9]{6}(-[0-9]{1,3})?$"
+    },
+    "decisions": { "type": "array", "items": { "type": "string" } },
+    "openQuestions": { "type": "array", "items": { "type": "string" } },
+    "notes": {
+      "description": "The note's files, by name beside this one.",
+      "type": ["object", "null"],
+      "required": ["markdown", "page"],
+      "properties": {
+        "markdown": { "type": "string" },
+        "page": { "type": "string" },
+        "audio": { "description": "Null when there's no MP3: none was made, or it was deleted with the working audio (Settings, Notes, Delete each note's MP3 too).", "type": ["string", "null"] }
+      }
+    },
+    "summaryMarkdown": { "description": "The whole summary, as Markdown.", "type": "string" },
+    "transcript": {
+      "description": "One entry per speaker's turn. Missing when the user left it out (Settings, Notes, Meeting file); leftOut then says so.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["start", "end", "speaker", "me", "text"],
+        "properties": {
+          "start": { "type": "number", "minimum": 0 },
+          "end": { "type": "number", "minimum": 0 },
+          "speaker": { "type": "string" },
+          "me": { "type": "boolean" },
+          "text": { "type": "string" }
+        }
+      }
+    },
+    "leftOut": {
+      "description": "What the user chose to leave out of the file, so a program can tell that from a meeting without it. Missing when nothing was.",
+      "type": "array", "items": { "enum": ["transcript"] }, "uniqueItems": true
+    }
+  }
+}

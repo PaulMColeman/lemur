@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="356" height="270" role="img" aria-label="Lemur — LLM Meeting Recorder" viewBox="22 22 356 270">
+  <title>Lemur — LLM Meeting Recorder</title>
+  <path d="M196,262 C268,276 344,240 350,166 C355,110 338,66 304,54 C278,46 258,58 260,80" fill="none" stroke="#AAB4BE" stroke-width="34" stroke-linecap="round"/>
+  <path d="M196,262 C268,276 344,240 350,166 C355,110 338,66 304,54 C278,46 258,58 260,80" fill="none" stroke="#F1F4F6" stroke-width="26" stroke-linecap="round"/>
+  <path d="M196,262 C268,276 344,240 350,166 C355,110 338,66 304,54 C278,46 258,58 260,80" fill="none" stroke="#16191C" stroke-width="26" stroke-linecap="butt" stroke-dasharray="15 15" stroke-dashoffset="2"/>
+  <g transform="translate(0 30) scale(1)">
+  <polygon points="40,30 108,70 62,128" fill="#4B535C" stroke="#4B535C" stroke-width="14" stroke-linejoin="round"/>
+  <polygon points="54,48 94,76 66,110" fill="#EEF1F4" stroke="#EEF1F4" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="216,30 148,70 194,128" fill="#4B535C" stroke="#4B535C" stroke-width="14" stroke-linejoin="round"/>
+  <polygon points="202,48 162,76 190,110" fill="#EEF1F4" stroke="#EEF1F4" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M128,60 C170,60 202,84 213,118 C222,144 226,166 210,184 C192,204 156,216 128,234 C100,216 64,204 46,184 C30,166 34,144 43,118 C54,84 86,60 128,60 Z" fill="#AAB4BE"/>
+  <path d="M128,92 C164,92 192,110 202,136 C209,156 206,172 192,184 C174,200 150,210 128,226 C106,210 82,200 64,184 C50,172 47,156 54,136 C64,110 92,92 128,92 Z" fill="#F6F8FA"/>
+  <path d="M66,104 C78,78 102,66 128,66 C154,66 178,78 190,104 C170,98 148,99 128,112 C108,99 86,98 66,104 Z" fill="#454C54"/>
+  <path d="M116,194 L78.27,167.68 A24,24 0 1 1 116,148 Z" fill="#16191C" stroke="#16191C" stroke-width="6" stroke-linejoin="round"/>
+  <circle cx="92" cy="148" r="17.5" fill="#FFAE1A"/>
+  <circle cx="92" cy="148" r="16.25" fill="none" stroke="#E07B00" stroke-width="2.5"/>
+  <circle cx="93.5" cy="149" r="8" fill="#16191C"/>
+  <circle cx="86.5" cy="142" r="4" fill="#FFFFFF"/>
+  <path d="M140,194 L140,148 A24,24 0 1 1 177.73,167.68 Z" fill="#16191C" stroke="#16191C" stroke-width="6" stroke-linejoin="round"/>
+  <circle cx="164" cy="148" r="17.5" fill="#FFAE1A"/>
+  <circle cx="164" cy="148" r="16.25" fill="none" stroke="#E07B00" stroke-width="2.5"/>
+  <circle cx="162.5" cy="149" r="8" fill="#16191C"/>
+  <circle cx="158.5" cy="142" r="4" fill="#FFFFFF"/>
+  <polygon points="114,202 142,202 128,217" fill="#16191C" stroke="#16191C" stroke-width="9" stroke-linejoin="round"/>
+  </g>
+</svg>

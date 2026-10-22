@@ -1,0 +1,16 @@
+bin/
+obj/
+/publish/
+.vs/
+*.user
+TestResults/
+*.html
+!docs/help/*.html
+installer/out/
+installer/build/
+.claude/settings.local.json
+# Paul's own setup and the planning docs written to him: kept on his PC, not published
+docs/deployment-paul.md
+docs/2026-10-13-teams-recorder-plan.md
+docs/2026-10-13-speaker-names-design.md
+__pycache__/

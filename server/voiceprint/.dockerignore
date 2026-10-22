@@ -1,0 +1,7 @@
+**/bin/
+**/obj/
+Voiceprint.Service.Tests/
+models/
+.env
+*.md
+compose.yaml

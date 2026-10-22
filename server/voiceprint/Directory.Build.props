@@ -1,0 +1,14 @@
+<Project>
+  <!--
+    Deliberately does not import the repo-root Directory.Build.props: that one targets
+    net10.0-windows for the tray app, and this server kit must build the same way on its own
+    (Docker build context is this folder) and on Linux.
+  -->
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <Version>0.1.0</Version>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+</Project>
